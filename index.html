@@ -19,6 +19,9 @@
     <nav class="navbar navbar-dark bg-dark">
         <div class="container-fluid">
             <div class="d-flex gap-2">
+                <button class="btn btn-outline-light btn-sm" id="btnToggleSidebar" title="Toggle Sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <button class="btn btn-outline-light" id="btnPrev">
                     <i class="fas fa-chevron-left"></i> <span data-i18n="prev">Prev</span>
                 </button>
@@ -56,7 +59,7 @@
 
     <div class="container-fluid p-0 d-flex" style="height: calc(100vh - 56px);">
         <!-- Sidebar bên trái -->
-        <div class="sidebar bg-light border-end" id="sidebar">
+        <div class="sidebar bg-light border-end" id="sidebar" style="display: none;">
             <h5 class="p-3 border-bottom" data-i18n="addObject">Thêm Object</h5>
             <div class="list-group list-group-flush">
                 <a href="#" class="list-group-item list-group-item-action" data-type="text">

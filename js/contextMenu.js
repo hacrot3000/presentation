@@ -73,14 +73,24 @@ const ContextMenuManager = {
         const isDraggable = object ? (object.draggable !== false) : true;
         const draggableCheck = isDraggable ? '<i class="fas fa-check ms-2"></i>' : '';
 
-        // Cập nhật translation cho context menu
+        // Cập nhật translation cho context menu với icon
         const menuHtml = `
             <div class="list-group">
-                <a href="#" class="list-group-item list-group-item-action" data-action="edit">${LanguageManager.t('edit')}</a>
-                <a href="#" class="list-group-item list-group-item-action" data-action="delete">${LanguageManager.t('delete')}</a>
-                <a href="#" class="list-group-item list-group-item-action" data-action="bringToFront">${LanguageManager.t('bringToFront')}</a>
-                <a href="#" class="list-group-item list-group-item-action" data-action="sendToBack">${LanguageManager.t('sendToBack')}</a>
-                <a href="#" class="list-group-item list-group-item-action" data-action="toggleDraggable">${LanguageManager.t('toggleDraggable')}${draggableCheck}</a>
+                <a href="#" class="list-group-item list-group-item-action" data-action="edit">
+                    <i class="fas fa-edit me-2"></i>${LanguageManager.t('edit')}
+                </a>
+                <a href="#" class="list-group-item list-group-item-action" data-action="delete">
+                    <i class="fas fa-trash me-2"></i>${LanguageManager.t('delete')}
+                </a>
+                <a href="#" class="list-group-item list-group-item-action" data-action="bringToFront">
+                    <i class="fas fa-arrow-up me-2"></i>${LanguageManager.t('bringToFront')}
+                </a>
+                <a href="#" class="list-group-item list-group-item-action" data-action="sendToBack">
+                    <i class="fas fa-arrow-down me-2"></i>${LanguageManager.t('sendToBack')}
+                </a>
+                <a href="#" class="list-group-item list-group-item-action" data-action="toggleDraggable">
+                    <i class="fas fa-hand-paper me-2"></i>${LanguageManager.t('toggleDraggable')}${draggableCheck}
+                </a>
             </div>
         `;
         this.$menu.html(menuHtml);
@@ -93,7 +103,7 @@ const ContextMenuManager = {
         const clickX = e.pageX - canvasOffset.left;
         const clickY = e.pageY - canvasOffset.top;
 
-        // Tạo menu động với các loại object
+        // Tạo menu động với các loại object và icon
         let menuHtml = '<div class="list-group">';
         menuHtml += `<div class="list-group-item fw-bold">${LanguageManager.t('addObjectHere')}</div>`;
         const types = ['text', 'image', 'icon', 'button', 'checkbox', 'dropdown', 'toggle', 'toggle3state', 'rectangle', 'circle', 'ellipse'];
@@ -110,10 +120,24 @@ const ContextMenuManager = {
             circle: 'circle',
             ellipse: 'ellipse'
         };
+        const typeIcons = {
+            text: 'fa-font',
+            image: 'fa-image',
+            icon: 'fa-icons',
+            button: 'fa-hand-pointer',
+            checkbox: 'fa-check-square',
+            dropdown: 'fa-list',
+            toggle: 'fa-toggle-on',
+            toggle3state: 'fa-toggle-on',
+            rectangle: 'fa-square',
+            circle: 'fa-circle',
+            ellipse: 'fa-regular fa-circle'
+        };
 
         types.forEach(type => {
             const label = LanguageManager.t(typeKeys[type]);
-            menuHtml += `<a href="#" class="list-group-item list-group-item-action" data-action="add-${type}" data-x="${clickX}" data-y="${clickY}">${label}</a>`;
+            const icon = typeIcons[type] || 'fa-square';
+            menuHtml += `<a href="#" class="list-group-item list-group-item-action" data-action="add-${type}" data-x="${clickX}" data-y="${clickY}"><i class="fas ${icon} me-2"></i>${label}</a>`;
         });
         menuHtml += '<div class="list-group-item border-top mt-2"></div>';
         menuHtml += `<a href="#" class="list-group-item list-group-item-action" data-action="edit-background"><i class="fas fa-palette me-2"></i>${LanguageManager.t('editBackground')}</a>`;

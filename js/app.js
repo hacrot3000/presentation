@@ -9,6 +9,9 @@ const App = {
         DragDropManager.init($('#canvas'));
         ContextMenuManager.init();
 
+        // Khôi phục trạng thái sidebar
+        this.restoreSidebarState();
+
         // Bind events
         this.bindEvents();
 
@@ -17,6 +20,28 @@ const App = {
 
         // Cập nhật trạng thái nút ngôn ngữ
         this.updateLanguageButtons();
+    },
+
+    restoreSidebarState() {
+        const sidebarVisible = localStorage.getItem('sidebarVisible');
+        const $sidebar = $('#sidebar');
+        if (sidebarVisible === 'true') {
+            $sidebar.show();
+        } else {
+            $sidebar.hide();
+        }
+    },
+
+    toggleSidebar() {
+        const $sidebar = $('#sidebar');
+        const isVisible = $sidebar.is(':visible');
+        if (isVisible) {
+            $sidebar.hide();
+            localStorage.setItem('sidebarVisible', 'false');
+        } else {
+            $sidebar.show();
+            localStorage.setItem('sidebarVisible', 'true');
+        }
     },
 
     updateLanguageButtons() {
@@ -31,6 +56,12 @@ const App = {
     },
 
     bindEvents() {
+        // Toggle Sidebar
+        $('#btnToggleSidebar').on('click', (e) => {
+            e.preventDefault();
+            this.toggleSidebar();
+        });
+
         // Sidebar - Thêm object
         $('#sidebar .list-group-item').on('click', (e) => {
             e.preventDefault();

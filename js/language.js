@@ -25,6 +25,9 @@ const LanguageManager = {
             dropdown: 'Danh sách thả xuống',
             toggle: 'Nút bật/tắt',
             toggle3state: 'Nút bật/tắt 3 trạng thái',
+            rectangle: 'Hình chữ nhật',
+            circle: 'Hình tròn',
+            ellipse: 'Hình elip',
 
             // Context Menu
             edit: 'Chỉnh sửa',
@@ -128,6 +131,9 @@ const LanguageManager = {
             dropdown: 'Dropdown',
             toggle: 'Toggle Button',
             toggle3state: '3/4-state Toggle',
+            rectangle: 'Rectangle',
+            circle: 'Circle',
+            ellipse: 'Ellipse',
 
             // Context Menu
             edit: 'Edit',

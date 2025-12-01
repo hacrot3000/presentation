@@ -8,8 +8,35 @@ const config = {
     },
     defaultImageProps: {
         imageUrl: "./img/images_placeholder.jpg",
+        width: null, // null để tự động scale
+        height: null // null để tự động scale
+    },
+    defaultRectangleProps: {
         width: 200,
-        height: 150
+        height: 150,
+        hasBackground: true,
+        backgroundColor: "#007bff",
+        hasBorder: true,
+        borderColor: "#0056b3",
+        borderWidth: 2
+    },
+    defaultCircleProps: {
+        width: 150,
+        height: 150,
+        hasBackground: true,
+        backgroundColor: "#28a745",
+        hasBorder: true,
+        borderColor: "#1e7e34",
+        borderWidth: 2
+    },
+    defaultEllipseProps: {
+        width: 200,
+        height: 150,
+        hasBackground: true,
+        backgroundColor: "#ffc107",
+        hasBorder: true,
+        borderColor: "#e0a800",
+        borderWidth: 2
     },
     defaultIconProps: {
         icon: "fa-solid fa-user",

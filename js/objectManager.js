@@ -77,6 +77,12 @@ const ObjectManager = {
                 return { ...config.defaultToggleProps };
             case 'toggle3state':
                 return { ...config.defaultToggle3StateProps };
+            case 'rectangle':
+                return { ...config.defaultRectangleProps };
+            case 'circle':
+                return { ...config.defaultCircleProps };
+            case 'ellipse':
+                return { ...config.defaultEllipseProps };
             default:
                 return {};
         }
@@ -113,12 +119,41 @@ const ObjectManager = {
                 break;
 
             case 'image':
-                $obj.addClass('object-image')
-                    .css({
-                        width: object.props.width || 200,
-                        height: object.props.height || 150
-                    })
-                    .html(`<img src="${object.props.imageUrl || ''}" alt="Image">`);
+                $obj.addClass('object-image resizable-object');
+                const imgUrl = object.props.imageUrl || '';
+                const imgWidth = object.props.width !== null && object.props.width !== undefined ? object.props.width : null;
+                const imgHeight = object.props.height !== null && object.props.height !== undefined ? object.props.height : null;
+
+                // Xử lý logic width/height null
+                let imgStyle = '';
+                if (imgWidth === null && imgHeight === null) {
+                    // Cả hai đều null - hiển thị kích thước gốc
+                    imgStyle = 'max-width: none; max-height: none; width: auto; height: auto;';
+                } else if (imgWidth === null) {
+                    // Width null - scale theo height, giữ tỷ lệ
+                    imgStyle = `height: ${imgHeight}px; width: auto; max-width: 100%;`;
+                } else if (imgHeight === null) {
+                    // Height null - scale theo width, giữ tỷ lệ
+                    imgStyle = `width: ${imgWidth}px; height: auto; max-height: 100%;`;
+                } else {
+                    // Cả hai đều có giá trị
+                    imgStyle = `width: ${imgWidth}px; height: ${imgHeight}px;`;
+                }
+
+                // Set width/height cho container
+                if (imgWidth === null && imgHeight === null) {
+                    // Cả hai đều null - sẽ set sau khi image load
+                    $obj.css({
+                        width: 'auto',
+                        height: 'auto'
+                    });
+                } else {
+                    $obj.css({
+                        width: imgWidth || 'auto',
+                        height: imgHeight || 'auto'
+                    });
+                }
+                $obj.html(`<img src="${imgUrl}" alt="Image" style="${imgStyle}" onload="if(this.naturalWidth) { ObjectManager.updateImageSize(this); }">`);
                 break;
 
             case 'icon':
@@ -131,12 +166,21 @@ const ObjectManager = {
                 break;
 
             case 'button':
-                $obj.addClass('object-button')
+                // Button có thể có width/height ở top level hoặc trong props
+                const buttonWidth = object.width || object.props.width;
+                const buttonHeight = object.height || object.props.height;
+                $obj.addClass('object-button resizable-object')
                     .text(object.props.text || 'Button')
                     .css({
                         backgroundColor: object.props.backgroundColor || '#007bff',
                         color: object.props.color || '#fff',
-                        fontSize: (object.props.fontSize || 14) + 'px'
+                        fontSize: (object.props.fontSize || 14) + 'px',
+                        width: buttonWidth ? (buttonWidth + 'px') : 'auto',
+                        height: buttonHeight ? (buttonHeight + 'px') : 'auto',
+                        minWidth: '80px',
+                        minHeight: '30px',
+                        padding: '8px 16px',
+                        boxSizing: 'border-box'
                     });
                 break;
 
@@ -258,9 +302,162 @@ const ObjectManager = {
                     }
                 });
                 break;
+
+            case 'rectangle':
+                const rectWidth = object.props.width || object.width || 200;
+                const rectHeight = object.props.height || object.height || 150;
+                const rectHasBg = object.props.hasBackground !== false; // default true
+                const rectHasBorder = object.props.hasBorder !== false; // default true
+                $obj.addClass('object-rectangle resizable-object')
+                    .css({
+                        width: rectWidth,
+                        height: rectHeight,
+                        backgroundColor: rectHasBg ? (object.props.backgroundColor || '#007bff') : 'transparent',
+                        border: rectHasBorder ? `${object.props.borderWidth || 2}px solid ${object.props.borderColor || '#0056b3'}` : 'none',
+                        borderRadius: '4px'
+                    });
+                break;
+
+            case 'circle':
+                const circleSize = object.props.width || object.width || 150;
+                const circleHasBg = object.props.hasBackground !== false; // default true
+                const circleHasBorder = object.props.hasBorder !== false; // default true
+                $obj.addClass('object-circle resizable-object')
+                    .css({
+                        width: circleSize,
+                        height: circleSize,
+                        backgroundColor: circleHasBg ? (object.props.backgroundColor || '#28a745') : 'transparent',
+                        border: circleHasBorder ? `${object.props.borderWidth || 2}px solid ${object.props.borderColor || '#1e7e34'}` : 'none',
+                        borderRadius: '50%'
+                    });
+                break;
+
+            case 'ellipse':
+                const ellipseWidth = object.props.width || object.width || 200;
+                const ellipseHeight = object.props.height || object.height || 150;
+                const ellipseHasBg = object.props.hasBackground !== false; // default true
+                const ellipseHasBorder = object.props.hasBorder !== false; // default true
+                $obj.addClass('object-ellipse resizable-object')
+                    .css({
+                        width: ellipseWidth,
+                        height: ellipseHeight,
+                        backgroundColor: ellipseHasBg ? (object.props.backgroundColor || '#ffc107') : 'transparent',
+                        border: ellipseHasBorder ? `${object.props.borderWidth || 2}px solid ${object.props.borderColor || '#e0a800'}` : 'none',
+                        borderRadius: '50%'
+                    });
+                break;
+        }
+
+        // Thêm resize handles cho các object có thể resize
+        if ($obj.hasClass('resizable-object')) {
+            this.addResizeHandles($obj, object);
         }
 
         return $obj;
+    },
+
+    // Thêm resize handles cho object
+    addResizeHandles($obj, object) {
+        // Xóa handles cũ nếu có
+        $obj.find('.resize-handle').remove();
+
+        // Thêm 8 handles (4 góc + 4 cạnh)
+        const handles = [
+            { position: 'nw', cursor: 'nw-resize' }, // top-left
+            { position: 'n', cursor: 'n-resize' },   // top
+            { position: 'ne', cursor: 'ne-resize' }, // top-right
+            { position: 'e', cursor: 'e-resize' },   // right
+            { position: 'se', cursor: 'se-resize' }, // bottom-right
+            { position: 's', cursor: 's-resize' },   // bottom
+            { position: 'sw', cursor: 'sw-resize' }, // bottom-left
+            { position: 'w', cursor: 'w-resize' }    // left
+        ];
+
+        handles.forEach(handle => {
+            const $handle = $('<div>')
+                .addClass('resize-handle')
+                .addClass(`resize-${handle.position}`)
+                .css({
+                    position: 'absolute',
+                    cursor: handle.cursor,
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: '#007bff',
+                    border: '1px solid #fff',
+                    borderRadius: '50%',
+                    zIndex: 1000,
+                    display: 'none'
+                })
+                .data('position', handle.position);
+
+            $obj.append($handle);
+        });
+
+        // Position handles
+        this.updateResizeHandles($obj);
+
+        // Show handles khi hover
+        $obj.on('mouseenter', function() {
+            if (!$(this).hasClass('dragging') && !$(this).hasClass('resizing')) {
+                $(this).find('.resize-handle').show();
+            }
+        }).on('mouseleave', function() {
+            $(this).find('.resize-handle').hide();
+        });
+    },
+
+    // Cập nhật kích thước image khi load xong
+    updateImageSize(imgElement) {
+        const $img = $(imgElement);
+        const $obj = $img.closest('.canvas-object');
+        if (!$obj.length) return;
+
+        const id = $obj.data('id');
+        const object = this.getObject(id);
+
+        if (!object || object.type !== 'image') return;
+
+        // Nếu cả width và height đều null, set kích thước gốc
+        if (object.props.width === null && object.props.height === null) {
+            const naturalWidth = imgElement.naturalWidth;
+            const naturalHeight = imgElement.naturalHeight;
+            if (naturalWidth && naturalHeight) {
+                $obj.css({
+                    width: naturalWidth + 'px',
+                    height: naturalHeight + 'px'
+                });
+                // Cập nhật lại handles nếu có
+                if ($obj.hasClass('resizable-object')) {
+                    this.updateResizeHandles($obj);
+                }
+            }
+        }
+    },
+
+    // Cập nhật vị trí resize handles
+    updateResizeHandles($obj) {
+        const width = $obj.width() || parseInt($obj.css('width')) || 0;
+        const height = $obj.height() || parseInt($obj.css('height')) || 0;
+        const halfHandle = 4; // 8px / 2
+
+        $obj.find('.resize-handle').each(function() {
+            const $handle = $(this);
+            const position = $handle.data('position');
+            let left = 0, top = 0;
+
+            switch(position) {
+                case 'nw': left = -halfHandle; top = -halfHandle; break;
+                case 'n': left = width / 2 - halfHandle; top = -halfHandle; break;
+                case 'ne': left = width - halfHandle; top = -halfHandle; break;
+                case 'e': left = width - halfHandle; top = height / 2 - halfHandle; break;
+                case 'se': left = width - halfHandle; top = height - halfHandle; break;
+                case 's': left = width / 2 - halfHandle; top = height - halfHandle; break;
+                case 'sw': left = -halfHandle; top = height - halfHandle; break;
+                case 'w': left = -halfHandle; top = height / 2 - halfHandle; break;
+            }
+
+            $handle.css({ left: left + 'px', top: top + 'px' });
+        });
     },
 
     // Thêm object vào canvas

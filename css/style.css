@@ -227,6 +227,46 @@
     display: none !important;
 }
 
+/* Resizable objects */
+/* .canvas-object.resizable-object {
+    position: relative;
+} */
+
+.canvas-object.resizing {
+    user-select: none;
+}
+
+/* Resize handles */
+.resize-handle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #007bff;
+    border: 1px solid #fff;
+    border-radius: 50%;
+    z-index: 1000;
+    display: none;
+}
+
+.resize-handle:hover {
+    background-color: #0056b3;
+    transform: scale(1.2);
+}
+
+/* Shape objects */
+.object-rectangle,
+.object-circle,
+.object-ellipse {
+    box-sizing: border-box;
+}
+
+.object-image img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    object-fit: contain;
+}
+
 /* Language buttons */
 .btn-group .btn.active {
     background-color: #007bff;

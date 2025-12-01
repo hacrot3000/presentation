@@ -12,7 +12,9 @@ const ContextMenuManager = {
         // Right click trên object
         $(document).on('contextmenu', '.canvas-object', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             const id = $(e.currentTarget).data('id');
+            console.log('Right click on object:', id);
             this.showMenu(e.pageX, e.pageY, id);
         });
 
@@ -24,36 +26,53 @@ const ContextMenuManager = {
 
         // Click để đóng menu (nhưng không đóng khi click vào menu)
         $(document).on('click', (e) => {
-            if (!$(e.target).closest('.context-menu').length) {
+            // Không đóng nếu click vào menu hoặc item trong menu
+            if (!$(e.target).closest('.context-menu').length &&
+                !$(e.target).is('.context-menu') &&
+                !$(e.target).closest('[data-action]').length) {
                 this.hideMenu();
             }
         });
 
-        // Menu actions
-        $(document).on('click', '.context-menu [data-action]', (e) => {
+        // Menu actions - sử dụng click với stopPropagation
+        // Sử dụng event delegation với selector cụ thể hơn
+        $(document).on('click', '#contextMenu [data-action]', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
             const action = $(e.currentTarget).data('action');
+            console.log('Context menu action clicked:', action, 'currentObjectId:', this.currentObjectId);
             this.handleAction(action);
             this.hideMenu();
+            return false;
         });
     },
 
     showMenu(x, y, objectId) {
+        console.log('showMenu called with objectId:', objectId, 'at', x, y);
         this.currentObjectId = objectId;
         ObjectManager.selectObject(objectId);
 
         // Đảm bảo menu có đầy đủ các action với translation
         this.updateContextMenu();
 
+        // Đảm bảo menu có z-index cao và hiển thị đúng
         this.$menu.css({
             left: x + 'px',
             top: y + 'px',
-            display: 'block'
+            display: 'block',
+            zIndex: 10001
         });
+
+        console.log('Context menu displayed, HTML:', this.$menu.html());
     },
 
     updateContextMenu() {
+        // Lấy object hiện tại để kiểm tra trạng thái draggable
+        const object = this.currentObjectId ? ObjectManager.getObject(this.currentObjectId) : null;
+        const isDraggable = object ? (object.draggable !== false) : true;
+        const draggableCheck = isDraggable ? '<i class="fas fa-check ms-2"></i>' : '';
+
         // Cập nhật translation cho context menu
         const menuHtml = `
             <div class="list-group">
@@ -61,7 +80,7 @@ const ContextMenuManager = {
                 <a href="#" class="list-group-item list-group-item-action" data-action="delete">${LanguageManager.t('delete')}</a>
                 <a href="#" class="list-group-item list-group-item-action" data-action="bringToFront">${LanguageManager.t('bringToFront')}</a>
                 <a href="#" class="list-group-item list-group-item-action" data-action="sendToBack">${LanguageManager.t('sendToBack')}</a>
-                <a href="#" class="list-group-item list-group-item-action" data-action="toggleDraggable">${LanguageManager.t('toggleDraggable')}</a>
+                <a href="#" class="list-group-item list-group-item-action" data-action="toggleDraggable">${LanguageManager.t('toggleDraggable')}${draggableCheck}</a>
             </div>
         `;
         this.$menu.html(menuHtml);
@@ -122,6 +141,12 @@ const ContextMenuManager = {
 
             const object = ObjectManager.createObject(type, x, y);
             ObjectManager.addObjectToCanvas(object, $('#canvas'));
+
+            // Tự động mở edit dialog sau khi thêm object
+            setTimeout(() => {
+                this.showEditModal(object);
+            }, 100);
+
             PageManager.saveCurrentPage();
             return;
         }
@@ -131,10 +156,16 @@ const ContextMenuManager = {
             return;
         }
 
-        if (!this.currentObjectId) return;
+        if (!this.currentObjectId) {
+            console.log('No currentObjectId for action:', action);
+            return;
+        }
 
         const object = ObjectManager.getObject(this.currentObjectId);
-        if (!object) return;
+        if (!object) {
+            console.log('Object not found:', this.currentObjectId);
+            return;
+        }
 
         switch(action) {
             case 'edit':
@@ -172,6 +203,12 @@ const ContextMenuManager = {
     },
 
     showEditModal(object) {
+        if (!object || !object.id) {
+            console.error('Invalid object passed to showEditModal:', object);
+            return;
+        }
+
+        this.editingObjectId = object.id;
         const $modal = $('#editObjectModal');
         const $form = $('#editObjectForm');
         $form.empty();
@@ -286,19 +323,24 @@ const ContextMenuManager = {
                 break;
 
             case 'toggle':
-                const toggleTexts = object.props.texts || { off: 'Toggle', on: 'Toggle' };
+                // Đảm bảo texts được khởi tạo đúng
+                if (!object.props.texts) {
+                    object.props.texts = { off: 'Toggle', on: 'Toggle' };
+                }
+                const toggleTexts = object.props.texts;
+                const toggleActive = object.props.active === true;
                 formHtml = `
                     <div class="mb-3">
-                        <label class="form-label">Text khi OFF</label>
-                        <input type="text" class="form-control" id="editTextOff" value="${toggleTexts.off || 'Toggle'}">
+                        <label class="form-label">${LanguageManager.t('textWhenOff')}</label>
+                        <input type="text" class="form-control" id="editTextOff" value="${(toggleTexts.off || 'Toggle').replace(/"/g, '&quot;')}">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Text khi ON</label>
-                        <input type="text" class="form-control" id="editTextOn" value="${toggleTexts.on || 'Toggle'}">
+                        <label class="form-label">${LanguageManager.t('textWhenOn')}</label>
+                        <input type="text" class="form-control" id="editTextOn" value="${(toggleTexts.on || 'Toggle').replace(/"/g, '&quot;')}">
                     </div>
                     <div class="mb-3">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editActive" ${object.props.active ? 'checked' : ''}>
+                            <input class="form-check-input" type="checkbox" id="editActive" ${toggleActive ? 'checked' : ''}>
                             <label class="form-check-label" for="editActive">${LanguageManager.t('active')}</label>
                         </div>
                     </div>
@@ -306,27 +348,32 @@ const ContextMenuManager = {
                 break;
 
             case 'toggle3state':
-                const stateTexts = object.props.texts || {
-                    0: '3-State Toggle',
-                    1: '3-State Toggle',
-                    2: '3-State Toggle'
-                };
+                // Đảm bảo texts được khởi tạo đúng
+                if (!object.props.texts) {
+                    object.props.texts = {
+                        0: '3-State Toggle',
+                        1: '3-State Toggle',
+                        2: '3-State Toggle'
+                    };
+                }
+                const stateTexts = object.props.texts;
+                const currentState = object.props.state !== undefined ? object.props.state : 0;
                 formHtml = `
                     <div class="mb-3">
-                        <label class="form-label">Text State 0 (Red)</label>
-                        <input type="text" class="form-control" id="editTextState0" value="${stateTexts[0] || '3-State Toggle'}">
+                        <label class="form-label">${LanguageManager.t('textState0')}</label>
+                        <input type="text" class="form-control" id="editTextState0" value="${(stateTexts[0] || '3-State Toggle').replace(/"/g, '&quot;')}">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Text State 1 (Yellow)</label>
-                        <input type="text" class="form-control" id="editTextState1" value="${stateTexts[1] || '3-State Toggle'}">
+                        <label class="form-label">${LanguageManager.t('textState1')}</label>
+                        <input type="text" class="form-control" id="editTextState1" value="${(stateTexts[1] || '3-State Toggle').replace(/"/g, '&quot;')}">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Text State 2 (Green)</label>
-                        <input type="text" class="form-control" id="editTextState2" value="${stateTexts[2] || '3-State Toggle'}">
+                        <label class="form-label">${LanguageManager.t('textState2')}</label>
+                        <input type="text" class="form-control" id="editTextState2" value="${(stateTexts[2] || '3-State Toggle').replace(/"/g, '&quot;')}">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">${LanguageManager.t('state')}</label>
-                        <input type="number" class="form-control" id="editState" value="${object.props.state || 0}" min="0" max="2">
+                        <input type="number" class="form-control" id="editState" value="${currentState}" min="0" max="2">
                     </div>
                 `;
                 break;

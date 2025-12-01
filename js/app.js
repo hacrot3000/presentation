@@ -38,6 +38,12 @@ const App = {
             if (type) {
                 const object = ObjectManager.createObject(type);
                 ObjectManager.addObjectToCanvas(object, $('#canvas'));
+
+                // Tự động mở edit dialog sau khi thêm object
+                setTimeout(() => {
+                    ContextMenuManager.showEditModal(object);
+                }, 100);
+
                 PageManager.saveCurrentPage();
             }
         });

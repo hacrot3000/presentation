@@ -7,31 +7,31 @@ const LanguageManager = {
             appTitle: 'Ứng dụng Trình diễn',
 
             // Toolbar
-            prev: 'Prev',
-            next: 'Next',
+            prev: 'Trước',
+            next: 'Sau',
             addPage: 'Thêm trang mới',
             saveState: 'Lưu trạng thái',
-            scriptEditor: 'Script Editor',
+            scriptEditor: 'Trình chỉnh sửa Script',
             page: 'Trang',
             of: '/',
 
             // Sidebar
             addObject: 'Thêm Object',
-            text: 'Text',
-            image: 'Image',
-            icon: 'Icon',
-            button: 'Button',
-            checkbox: 'Checkbox',
-            dropdown: 'Dropdown',
-            toggle: 'Toggle Button',
-            toggle3state: '3/4-state Toggle',
+            text: 'Văn bản',
+            image: 'Hình ảnh',
+            icon: 'Biểu tượng',
+            button: 'Nút bấm',
+            checkbox: 'Hộp kiểm',
+            dropdown: 'Danh sách thả xuống',
+            toggle: 'Nút bật/tắt',
+            toggle3state: 'Nút bật/tắt 3 trạng thái',
 
             // Context Menu
             edit: 'Chỉnh sửa',
             delete: 'Xóa',
-            bringToFront: 'Bring to Front',
-            sendToBack: 'Send to Back',
-            toggleDraggable: 'Toggle Draggable',
+            bringToFront: 'Đưa lên trên',
+            sendToBack: 'Đưa xuống dưới',
+            toggleDraggable: 'Bật/Tắt kéo thả',
             addObjectHere: 'Thêm object tại đây:',
             editBackground: 'Chỉnh sửa Background',
 
@@ -39,19 +39,19 @@ const LanguageManager = {
             editObject: 'Chỉnh sửa Object',
             close: 'Đóng',
             save: 'Lưu',
-            scriptEditorTitle: 'Script Editor',
-            addAction: 'Thêm Action',
+            scriptEditorTitle: 'Trình chỉnh sửa Script',
+            addAction: 'Thêm Hành động',
             saveScript: 'Lưu Script',
-            addActionTitle: 'Thêm Action',
-            actionType: 'Loại Action',
-            target: 'Target (Object ID, cách nhau bằng dấu phẩy cho show/hide)',
+            addActionTitle: 'Thêm Hành động',
+            actionType: 'Loại Hành động',
+            target: 'Đối tượng (Object ID, cách nhau bằng dấu phẩy cho show/hide)',
             x: 'X',
             y: 'Y',
-            time: 'Time (ms)',
+            time: 'Thời gian (ms)',
             add: 'Thêm',
             saveStateTitle: 'Lưu trạng thái',
             downloadJSON: 'Tải xuống file JSON',
-            editBackgroundTitle: 'Chỉnh sửa Background',
+            editBackgroundTitle: 'Chỉnh sửa Nền',
             backgroundColor: 'Màu nền',
             backgroundImageUrl: 'Hình nền (URL)',
             backgroundImageUrlHint: 'Để trống nếu không muốn dùng hình nền',
@@ -61,26 +61,26 @@ const LanguageManager = {
             repeat: 'Lặp lại',
             repeatX: 'Lặp theo chiều ngang',
             repeatY: 'Lặp theo chiều dọc',
-            cover: 'Cover (phủ toàn bộ)',
-            contain: 'Contain (giữ nguyên tỷ lệ)',
-            auto: 'Auto (kích thước gốc)',
-            stretch: '100% x 100% (kéo dãn)',
+            cover: 'Phủ toàn bộ',
+            contain: 'Giữ nguyên tỷ lệ',
+            auto: 'Kích thước gốc',
+            stretch: 'Kéo dãn 100% x 100%',
 
             // Object Properties
-            textLabel: 'Text',
-            color: 'Color',
-            fontSize: 'Font Size',
-            imageUrl: 'Image URL',
-            width: 'Width',
-            height: 'Height',
-            iconClass: 'Icon Class',
-            backgroundColor: 'Background Color',
-            textColor: 'Text Color',
-            checked: 'Checked',
-            options: 'Options (mỗi option một dòng)',
-            selectedIndex: 'Selected Index',
-            active: 'Active',
-            state: 'State (0: Red, 1: Yellow, 2: Green)',
+            textLabel: 'Văn bản',
+            color: 'Màu sắc',
+            fontSize: 'Cỡ chữ',
+            imageUrl: 'URL ảnh',
+            width: 'Chiều rộng',
+            height: 'Chiều cao',
+            iconClass: 'Lớp Icon',
+            backgroundColor: 'Màu nền',
+            textColor: 'Màu chữ',
+            checked: 'Đã chọn',
+            options: 'Tùy chọn (mỗi option một dòng)',
+            selectedIndex: 'Chỉ mục được chọn',
+            active: 'Kích hoạt',
+            state: 'Trạng thái (0: Đỏ, 1: Vàng, 2: Xanh)',
 
             // Messages
             confirmDelete: 'Bạn có chắc muốn xóa object này?',
@@ -92,9 +92,16 @@ const LanguageManager = {
             fileReadError: 'Lỗi đọc file: {error}',
 
             // Action Types
-            show: 'Show',
-            hide: 'Hide',
-            move: 'Move'
+            show: 'Hiển thị',
+            hide: 'Ẩn',
+            move: 'Di chuyển',
+
+            // Toggle Text Labels
+            textWhenOff: 'Văn bản khi TẮT',
+            textWhenOn: 'Văn bản khi BẬT',
+            textState0: 'Văn bản Trạng thái 0 (Đỏ)',
+            textState1: 'Văn bản Trạng thái 1 (Vàng)',
+            textState2: 'Văn bản Trạng thái 2 (Xanh)'
         },
         en: {
             // App
@@ -188,7 +195,14 @@ const LanguageManager = {
             // Action Types
             show: 'Show',
             hide: 'Hide',
-            move: 'Move'
+            move: 'Move',
+
+            // Toggle Text Labels
+            textWhenOff: 'Text when OFF',
+            textWhenOn: 'Text when ON',
+            textState0: 'Text State 0 (Red)',
+            textState1: 'Text State 1 (Yellow)',
+            textState2: 'Text State 2 (Green)'
         }
     },
 

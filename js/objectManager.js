@@ -31,6 +31,16 @@ const ObjectManager = {
         const id = this.generateId();
         const defaultProps = this.getDefaultProps(type);
 
+        // Merge props, đảm bảo texts được copy đúng (deep copy)
+        const mergedProps = { ...defaultProps };
+        if (defaultProps.texts) {
+            mergedProps.texts = { ...defaultProps.texts };
+        }
+        Object.assign(mergedProps, props);
+        if (props.texts) {
+            mergedProps.texts = { ...props.texts };
+        }
+
         const object = {
             id: id,
             type: type,
@@ -41,7 +51,7 @@ const ObjectManager = {
             draggable: true,
             visible: true,
             zIndex: 1,
-            props: { ...defaultProps, ...props }
+            props: mergedProps
         };
 
         this.objects[id] = object;
@@ -163,8 +173,12 @@ const ObjectManager = {
                 break;
 
             case 'toggle':
-                const toggleActive = object.props.active || false;
-                const toggleTexts = object.props.texts || { off: 'Toggle', on: 'Toggle' };
+                // Đảm bảo texts được khởi tạo đúng
+                if (!object.props.texts) {
+                    object.props.texts = { off: 'Toggle', on: 'Toggle' };
+                }
+                const toggleActive = object.props.active === true; // Đảm bảo boolean
+                const toggleTexts = object.props.texts;
                 const toggleText = toggleActive ? toggleTexts.on : toggleTexts.off;
                 const toggleClass = toggleActive ? 'active' : '';
                 $obj.addClass('object-toggle')
@@ -191,13 +205,17 @@ const ObjectManager = {
                 break;
 
             case 'toggle3state':
-                const currentState = object.props.state || 0;
-                const stateTexts = object.props.texts || {
-                    0: '3-State Toggle',
-                    1: '3-State Toggle',
-                    2: '3-State Toggle'
-                };
-                const stateText = stateTexts[currentState] || '3-State Toggle';
+                // Đảm bảo texts được khởi tạo đúng
+                if (!object.props.texts) {
+                    object.props.texts = {
+                        0: '3-State Toggle',
+                        1: '3-State Toggle',
+                        2: '3-State Toggle'
+                    };
+                }
+                const currentState = object.props.state !== undefined ? object.props.state : 0;
+                const stateTexts = object.props.texts;
+                const stateText = stateTexts[currentState] || stateTexts[0] || '3-State Toggle';
                 const stateClass = `state-${currentState}`;
                 $obj.addClass('object-toggle-3state')
                     .html(`

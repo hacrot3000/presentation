@@ -1,0 +1,235 @@
+/* Layout */
+.sidebar {
+    width: 250px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.canvas-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.canvas {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-color: #f5f5f5;
+    overflow: hidden;
+}
+
+/* Object Styles */
+.canvas-object {
+    position: absolute;
+    cursor: move;
+    border: 2px dashed transparent;
+    min-width: 50px;
+    min-height: 30px;
+}
+
+.canvas-object:hover {
+    border-color: #007bff;
+}
+
+.canvas-object.selected {
+    border-color: #007bff;
+    border-style: solid;
+}
+
+.canvas-object.dragging {
+    opacity: 0.7;
+    z-index: 10000;
+}
+
+.canvas-object.not-draggable {
+    cursor: default;
+}
+
+/* Object Types */
+.object-text {
+    padding: 5px;
+    user-select: none;
+}
+
+.object-image {
+    user-select: none;
+}
+
+.object-image img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+}
+
+.object-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.object-button {
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+}
+
+.object-button:hover {
+    background-color: #0056b3;
+}
+
+.object-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px;
+    user-select: none;
+}
+
+.object-checkbox input[type="checkbox"] {
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.object-dropdown {
+    padding: 5px;
+    user-select: none;
+}
+
+.object-dropdown select {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.object-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px;
+    user-select: none;
+}
+
+.object-toggle-switch {
+    width: 50px;
+    height: 24px;
+    background-color: #ccc;
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.object-toggle-switch.active {
+    background-color: #28a745;
+}
+
+.object-toggle-switch::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: left 0.3s;
+}
+
+.object-toggle-switch.active::after {
+    left: 28px;
+}
+
+.object-toggle-3state {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px;
+    user-select: none;
+}
+
+.object-toggle-3state-switch {
+    width: 60px;
+    height: 24px;
+    background-color: #ccc;
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.object-toggle-3state-switch.state-0 {
+    background-color: #dc3545;
+}
+
+.object-toggle-3state-switch.state-1 {
+    background-color: #ffc107;
+}
+
+.object-toggle-3state-switch.state-2 {
+    background-color: #28a745;
+}
+
+.object-toggle-3state-switch::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: left 0.3s;
+}
+
+.object-toggle-3state-switch.state-1::after {
+    left: 20px;
+}
+
+.object-toggle-3state-switch.state-2::after {
+    left: 38px;
+}
+
+/* Context Menu */
+.context-menu {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 10000;
+    min-width: 200px;
+}
+
+.context-menu .list-group-item {
+    cursor: pointer;
+    border: none;
+    border-bottom: 1px solid #eee;
+}
+
+.context-menu .list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.context-menu .list-group-item:last-child {
+    border-bottom: none;
+}
+
+/* Hidden objects */
+.canvas-object.hidden {
+    display: none !important;
+}
+
+/* Language buttons */
+.btn-group .btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}

@@ -31,8 +31,8 @@ presentation/
 │   └── language.js    # Quản lý đa ngôn ngữ
 ├── conf/
 │   └── config.js      # Cấu hình mặc định
-├── README.md          # File hướng dẫn tiếng Việt
-└── README_EN.md       # File hướng dẫn tiếng Anh
+├── README.md          # File hướng dẫn tiếng Anh
+└── README_EN.md       # File hướng dẫn tiếng Việt
 ```
 
 ## 🎯 Hướng dẫn sử dụng

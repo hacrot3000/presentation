@@ -31,8 +31,8 @@ presentation/
 │   └── language.js    # Language management
 ├── conf/
 │   └── config.js      # Default configuration
-├── README.md          # Vietnamese documentation
-└── README_EN.md       # English documentation (this file)
+├── README.md          # English documentation (this file)
+└── README_VI.md       # Vietnamese documentation
 ```
 
 ## 🎯 Usage Guide

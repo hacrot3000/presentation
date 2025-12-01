@@ -125,10 +125,12 @@ Background is saved separately for each page and automatically applied when swit
 - **Auto-save**: Page state is automatically saved when switching pages
 - **Restore**: When reloading page, all pages and objects will be restored from localStorage
 
-### 9. Save and Export
+### 9. Save and Export/Import
 
 - **Save State**: Click "Save State" button → View JSON configuration → Click "Download JSON File"
-- **Import**: (Feature can be extended) Load JSON file to import configuration
+- **Import**: Click "Import" button on toolbar → Select previously downloaded JSON file → Confirm import
+  - **Note**: Import will overwrite all current data in localStorage
+  - After successful import, the page will automatically reload to display new data
 
 ### 10. Object Types and Properties
 

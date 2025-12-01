@@ -192,10 +192,13 @@ const App = {
         const $fileInput = $('<input type="file" accept=".json" style="display:none;" id="importFile">');
         $('body').append($fileInput);
 
-        // Có thể thêm nút import nếu cần
-        // $('#btnImportJSON').on('click', () => {
-        //     $fileInput.click();
-        // });
+        // Nút import
+        $('#btnImportState').on('click', () => {
+            // Cảnh báo người dùng về việc ghi đè dữ liệu
+            if (confirm(LanguageManager.t('importConfirm'))) {
+                $fileInput.click();
+            }
+        });
 
         $fileInput.on('change', function(e) {
             const file = e.target.files[0];
@@ -206,12 +209,20 @@ const App = {
                         const data = JSON.parse(event.target.result);
                         if (PageManager.importData(data)) {
                             alert(LanguageManager.t('importSuccess'));
+                            // Reload trang để hiển thị dữ liệu mới
+                            location.reload();
                         } else {
                             alert(LanguageManager.t('importError'));
                         }
                     } catch (err) {
                         alert(LanguageManager.t('fileReadError', { error: err.message }));
                     }
+                    // Reset input để có thể chọn lại file cùng tên
+                    $fileInput.val('');
+                };
+                reader.onerror = function() {
+                    alert(LanguageManager.t('fileReadError', { error: 'Không thể đọc file' }));
+                    $fileInput.val('');
                 };
                 reader.readAsText(file);
             }

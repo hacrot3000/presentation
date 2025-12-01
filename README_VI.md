@@ -126,10 +126,12 @@ Background được lưu riêng cho từng trang và tự động áp dụng khi
 - **Tự động lưu**: Trạng thái trang tự động được lưu khi chuyển trang
 - **Khôi phục**: Khi reload trang, tất cả trang và object sẽ được khôi phục từ localStorage
 
-### 9. Lưu và Export
+### 9. Lưu và Export/Import
 
 - **Lưu trạng thái**: Click nút "Lưu trạng thái" → Xem JSON cấu hình → Click "Tải xuống file JSON"
-- **Import**: (Tính năng có thể mở rộng) Load file JSON để import cấu hình
+- **Import**: Click nút "Import" trên thanh công cụ → Chọn file JSON đã tải trước đó → Xác nhận import
+  - **Lưu ý**: Import sẽ ghi đè toàn bộ dữ liệu hiện tại trong localStorage
+  - Sau khi import thành công, trang sẽ tự động reload để hiển thị dữ liệu mới
 
 ### 10. Các loại Object và thuộc tính
 

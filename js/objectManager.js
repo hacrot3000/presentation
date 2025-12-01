@@ -193,7 +193,14 @@ const ObjectManager = {
                     const obj = ObjectManager.getObject(objId);
                     if (obj) {
                         const newActive = !obj.props.active;
-                        ObjectManager.updateObject(objId, { props: { active: newActive } });
+                        // Đảm bảo giữ lại texts khi update
+                        const currentTexts = obj.props.texts || { off: 'Toggle', on: 'Toggle' };
+                        ObjectManager.updateObject(objId, {
+                            props: {
+                                active: newActive,
+                                texts: currentTexts // Giữ lại texts
+                            }
+                        });
                         // Re-render để cập nhật text và state
                         const $oldObj = $(`.canvas-object[data-id="${objId}"]`);
                         const updatedObj = ObjectManager.getObject(objId);
@@ -230,7 +237,18 @@ const ObjectManager = {
                     if (obj) {
                         const currentState = obj.props.state || 0;
                         const nextState = (currentState + 1) % 3; // Cycle 0 -> 1 -> 2 -> 0
-                        ObjectManager.updateObject(objId, { props: { state: nextState } });
+                        // Đảm bảo giữ lại texts khi update
+                        const currentTexts = obj.props.texts || {
+                            0: '3-State Toggle',
+                            1: '3-State Toggle',
+                            2: '3-State Toggle'
+                        };
+                        ObjectManager.updateObject(objId, {
+                            props: {
+                                state: nextState,
+                                texts: currentTexts // Giữ lại texts
+                            }
+                        });
                         // Re-render để cập nhật text và state
                         const $oldObj = $(`.canvas-object[data-id="${objId}"]`);
                         const updatedObj = ObjectManager.getObject(objId);
@@ -257,7 +275,21 @@ const ObjectManager = {
         if (this.objects[id]) {
             Object.assign(this.objects[id], updates);
             if (updates.props) {
-                Object.assign(this.objects[id].props, updates.props);
+                // Merge props, đảm bảo giữ lại nested objects như texts
+                const currentProps = this.objects[id].props || {};
+                const newProps = { ...currentProps };
+
+                // Merge từng property, đặc biệt xử lý nested objects
+                Object.keys(updates.props).forEach(key => {
+                    if (key === 'texts' && typeof updates.props[key] === 'object' && updates.props[key] !== null) {
+                        // Deep merge cho texts - giữ lại tất cả các keys
+                        newProps[key] = { ...currentProps[key], ...updates.props[key] };
+                    } else {
+                        newProps[key] = updates.props[key];
+                    }
+                });
+
+                this.objects[id].props = newProps;
             }
             return this.objects[id];
         }

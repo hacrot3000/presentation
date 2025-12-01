@@ -90,6 +90,8 @@ const LanguageManager = {
             importSuccess: 'Import thành công!',
             importError: 'Dữ liệu không hợp lệ!',
             fileReadError: 'Lỗi đọc file: {error}',
+            importConfirm: 'Bạn có chắc muốn import file JSON? Dữ liệu hiện tại sẽ bị ghi đè.',
+            importState: 'Import',
 
             // Action Types
             show: 'Hiển thị',
@@ -191,6 +193,8 @@ const LanguageManager = {
             importSuccess: 'Import successful!',
             importError: 'Invalid data!',
             fileReadError: 'File read error: {error}',
+            importConfirm: 'Are you sure you want to import JSON file? Current data will be overwritten.',
+            importState: 'Import',
 
             // Action Types
             show: 'Show',

@@ -189,6 +189,16 @@
                         </div>
                         <small class="text-muted">Click vào object để thêm vào Target</small>
                     </div>
+                    <div class="mb-3" id="effectParams" style="display: none;">
+                        <label class="form-label">Hiệu ứng</label>
+                        <select class="form-select" id="actionEffect">
+                            <option value="none">Không hiệu ứng (ngay lập tức)</option>
+                            <option value="fade">Fade (mờ dần)</option>
+                            <option value="slide">Slide (trượt)</option>
+                        </select>
+                        <label class="form-label mt-2">Thời gian hiệu ứng (ms)</label>
+                        <input type="number" class="form-control" id="actionDuration" value="500" min="0">
+                    </div>
                     <div class="mb-3" id="moveParams" style="display: none;">
                         <label class="form-label" data-i18n="x">X</label>
                         <input type="number" class="form-control" id="actionX">

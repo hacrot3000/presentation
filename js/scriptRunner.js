@@ -81,10 +81,10 @@ const ScriptRunner = {
 
         switch(action.type) {
             case 'show':
-                this.showObjects(action.target);
+                this.showObjects(action.target, action.effect, action.duration);
                 break;
             case 'hide':
-                this.hideObjects(action.target);
+                this.hideObjects(action.target, action.effect, action.duration);
                 break;
             case 'move':
                 this.moveObject(action.target, action.x, action.y, action.time || 2000);
@@ -93,25 +93,87 @@ const ScriptRunner = {
     },
 
     // Hiển thị objects
-    showObjects(targets) {
+    showObjects(targets, effect, duration) {
         const targetArray = Array.isArray(targets) ? targets : [targets];
+        const effectType = effect || 'none';
+        const effectDuration = duration || 500;
+
         targetArray.forEach(targetId => {
             const object = ObjectManager.getObject(targetId);
-            if (object) {
-                ObjectManager.updateObject(targetId, { visible: true });
-                $(`.canvas-object[data-id="${targetId}"]`).removeClass('hidden');
+            if (!object) return;
+
+            const $obj = $(`.canvas-object[data-id="${targetId}"]`);
+
+            // Cập nhật state trước
+            ObjectManager.updateObject(targetId, { visible: true });
+
+            // Dừng mọi animation hiện tại và clear queue
+            $obj.stop(true, true);
+
+            // Xóa class hidden TRƯỚC (quan trọng vì CSS có !important)
+            $obj.removeClass('hidden');
+
+            // Force reflow để đảm bảo DOM đã update
+            $obj[0].offsetHeight;
+
+            // Áp dụng hiệu ứng
+            switch(effectType) {
+                case 'fade':
+                    // Set display block và opacity 0
+                    $obj.css({ display: 'block', opacity: 0 });
+                    // Animate opacity từ 0 lên 1
+                    $obj.animate({ opacity: 1 }, effectDuration, function() {
+                        // Clear opacity sau khi animation xong để về giá trị mặc định
+                        $obj.css('opacity', '');
+                    });
+                    break;
+                case 'slide':
+                    // slideDown sẽ tự động set display và animate height
+                    $obj.css({ display: 'block' });
+                    $obj.slideDown(effectDuration);
+                    break;
+                default:
+                    // Không hiệu ứng
+                    $obj.css({ display: 'block', opacity: '', height: '' });
+                    break;
             }
         });
     },
 
     // Ẩn objects
-    hideObjects(targets) {
+    hideObjects(targets, effect, duration) {
         const targetArray = Array.isArray(targets) ? targets : [targets];
+        const effectType = effect || 'none';
+        const effectDuration = duration || 500;
+
         targetArray.forEach(targetId => {
             const object = ObjectManager.getObject(targetId);
-            if (object) {
-                ObjectManager.updateObject(targetId, { visible: false });
-                $(`.canvas-object[data-id="${targetId}"]`).addClass('hidden');
+            if (!object) return;
+
+            const $obj = $(`.canvas-object[data-id="${targetId}"]`);
+
+            // Dừng mọi animation hiện tại và xóa queue
+            $obj.stop(true, false);
+
+            // Áp dụng hiệu ứng trước khi ẩn
+            switch(effectType) {
+                case 'fade':
+                    $obj.fadeOut(effectDuration, function() {
+                        ObjectManager.updateObject(targetId, { visible: false });
+                        $obj.addClass('hidden').css({ display: 'none', opacity: '' });
+                    });
+                    break;
+                case 'slide':
+                    $obj.slideUp(effectDuration, function() {
+                        ObjectManager.updateObject(targetId, { visible: false });
+                        $obj.addClass('hidden').css({ display: 'none', height: '' });
+                    });
+                    break;
+                default:
+                    // Không hiệu ứng
+                    ObjectManager.updateObject(targetId, { visible: false });
+                    $obj.addClass('hidden').css({ display: 'none' });
+                    break;
             }
         });
     },

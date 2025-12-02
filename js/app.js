@@ -150,7 +150,10 @@ const App = {
             $('#actionX').val('');
             $('#actionY').val('');
             $('#actionTime').val('2000');
+            $('#actionEffect').val('none');
+            $('#actionDuration').val('500');
             $('#moveParams').hide();
+            $('#effectParams').hide();
 
             // Populate object list
             const objects = ObjectManager.getAllObjects();
@@ -183,10 +186,24 @@ const App = {
         });
 
         $('#actionType').on('change', function() {
-            if ($(this).val() === 'move') {
+            const actionType = $(this).val();
+            if (actionType === 'move') {
                 $('#moveParams').show();
+                $('#effectParams').hide();
+            } else if (actionType === 'show' || actionType === 'hide') {
+                $('#moveParams').hide();
+                $('#effectParams').show();
             } else {
                 $('#moveParams').hide();
+                $('#effectParams').hide();
+            }
+        });
+
+        // Trigger change event khi mở modal để hiển thị đúng params
+        $('#addActionModal').on('show.bs.modal', function() {
+            const actionType = $('#actionType').val();
+            if (actionType === 'show' || actionType === 'hide') {
+                $('#effectParams').show();
             }
         });
 
@@ -227,6 +244,14 @@ const App = {
                 // show/hide có thể nhận array
                 const targets = target.split(',').map(t => t.trim()).filter(t => t);
                 action.target = targets.length === 1 ? targets[0] : targets;
+
+                // Thêm effect và duration nếu có
+                const effect = $('#actionEffect').val();
+                const duration = parseInt($('#actionDuration').val()) || 500;
+                if (effect && effect !== 'none') {
+                    action.effect = effect;
+                    action.duration = duration;
+                }
             }
 
             // Thêm vào script textarea

@@ -243,6 +243,25 @@ const ContextMenuManager = {
         // Tạo form động theo type
         let formHtml = '';
 
+        // Helper function để thêm trường tọa độ
+        const addPositionFields = () => {
+            return `
+                <div class="mb-3 border-top pt-3">
+                    <label class="form-label fw-bold">Tọa độ</label>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">X</label>
+                            <input type="number" class="form-control" id="editX" value="${object.x || 0}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Y</label>
+                            <input type="number" class="form-control" id="editY" value="${object.y || 0}">
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
         switch(object.type) {
             case 'text':
                 formHtml = `
@@ -258,6 +277,7 @@ const ContextMenuManager = {
                         <label class="form-label">${LanguageManager.t('fontSize')}</label>
                         <input type="number" class="form-control" id="editFontSize" value="${object.props.fontSize || 16}">
                     </div>
+                    ${addPositionFields()}
                 `;
                 break;
 
@@ -278,6 +298,7 @@ const ContextMenuManager = {
                         <input type="number" class="form-control" id="editHeight" value="${object.props.height !== null && object.props.height !== undefined ? object.props.height : ''}" placeholder="Tự động">
                     </div>
                     <small class="text-muted">Nếu để trống một trong hai, cái còn lại sẽ tự scale theo tỷ lệ gốc. Nếu để trống cả hai, hiển thị kích thước gốc.</small>
+                    ${addPositionFields()}
                 `;
                 break;
 
@@ -299,6 +320,7 @@ const ContextMenuManager = {
                         <label class="form-label">${LanguageManager.t('fontSize')}</label>
                         <input type="number" class="form-control" id="editFontSize" value="${object.props.fontSize || 24}">
                     </div>
+                    ${addPositionFields()}
                 `;
                 break;
 
@@ -320,6 +342,7 @@ const ContextMenuManager = {
                         <label class="form-label">${LanguageManager.t('fontSize')}</label>
                         <input type="number" class="form-control" id="editFontSize" value="${object.props.fontSize || 14}">
                     </div>
+                    ${addPositionFields()}
                 `;
                 break;
 
@@ -335,6 +358,7 @@ const ContextMenuManager = {
                             <label class="form-check-label" for="editChecked">${LanguageManager.t('checked')}</label>
                         </div>
                     </div>
+                    ${addPositionFields()}
                 `;
                 break;
 
@@ -349,6 +373,7 @@ const ContextMenuManager = {
                         <label class="form-label">${LanguageManager.t('selectedIndex')}</label>
                         <input type="number" class="form-control" id="editSelectedIndex" value="${object.props.selectedIndex || 0}" min="0">
                     </div>
+                    ${addPositionFields()}
                 `;
                 break;
 
@@ -374,6 +399,7 @@ const ContextMenuManager = {
                             <label class="form-check-label" for="editActive">${LanguageManager.t('active')}</label>
                         </div>
                     </div>
+                    ${addPositionFields()}
                 `;
                 break;
 
@@ -405,6 +431,7 @@ const ContextMenuManager = {
                         <label class="form-label">${LanguageManager.t('state')}</label>
                         <input type="number" class="form-control" id="editState" value="${currentState}" min="0" max="2">
                     </div>
+                    ${addPositionFields()}
                 `;
                 break;
 
@@ -444,6 +471,7 @@ const ContextMenuManager = {
                         <label class="form-label">Độ dày viền</label>
                         <input type="number" class="form-control" id="editBorderWidth" value="${object.props.borderWidth || 2}" min="0">
                     </div>
+                    ${addPositionFields()}
                 `;
                 break;
 
@@ -480,6 +508,7 @@ const ContextMenuManager = {
                         <label class="form-label">Độ dày viền</label>
                         <input type="number" class="form-control" id="editBorderWidth" value="${object.props.borderWidth || 2}" min="0">
                     </div>
+                    ${addPositionFields()}
                 `;
                 break;
 
@@ -519,6 +548,7 @@ const ContextMenuManager = {
                         <label class="form-label">Độ dày viền</label>
                         <input type="number" class="form-control" id="editBorderWidth" value="${object.props.borderWidth || 2}" min="0">
                     </div>
+                    ${addPositionFields()}
                 `;
                 break;
         }
@@ -640,6 +670,12 @@ const ContextMenuManager = {
             updates.props = { ...currentObject.props, ...updates.props };
         }
 
+        // Cập nhật tọa độ nếu có
+        const newX = parseInt($('#editX').val());
+        const newY = parseInt($('#editY').val());
+        if (!isNaN(newX)) updates.x = newX;
+        if (!isNaN(newY)) updates.y = newY;
+
         ObjectManager.updateObject(this.editingObjectId, updates);
 
         // Re-render object
@@ -647,6 +683,14 @@ const ContextMenuManager = {
         const newObject = ObjectManager.getObject(this.editingObjectId);
         const $newObj = ObjectManager.renderObject(newObject);
         $oldObj.replaceWith($newObj);
+
+        // Cập nhật vị trí CSS nếu tọa độ thay đổi
+        if (!isNaN(newX) || !isNaN(newY)) {
+            $newObj.css({
+                left: (newObject.x || 0) + 'px',
+                top: (newObject.y || 0) + 'px'
+            });
+        }
 
         PageManager.saveCurrentPage();
 

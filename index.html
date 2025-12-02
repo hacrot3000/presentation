@@ -45,6 +45,9 @@
                 <button class="btn btn-info" id="btnScriptEditor">
                     <i class="fas fa-code"></i> <span data-i18n="scriptEditor">Script Editor</span>
                 </button>
+                <button class="btn btn-secondary" id="btnShowAll">
+                    <i class="fas fa-eye"></i> <span data-i18n="showAll">Hiển thị tất cả</span>
+                </button>
                 <div class="btn-group" role="group">
                     <button type="button" class="btn btn-outline-light btn-sm" id="btnLangVI" data-lang="vi">
                         <i class="fas fa-language"></i> VI
@@ -178,6 +181,13 @@
                     <div class="mb-3">
                         <label class="form-label" data-i18n="target">Target (Object ID, cách nhau bằng dấu phẩy cho show/hide)</label>
                         <input type="text" class="form-control" id="actionTarget">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Danh sách Objects trong slide hiện tại:</label>
+                        <div id="objectList" class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+                            <small class="text-muted">Đang tải...</small>
+                        </div>
+                        <small class="text-muted">Click vào object để thêm vào Target</small>
                     </div>
                     <div class="mb-3" id="moveParams" style="display: none;">
                         <label class="form-label" data-i18n="x">X</label>

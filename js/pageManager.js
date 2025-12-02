@@ -88,6 +88,9 @@ const PageManager = {
 
         // Load script
         ScriptRunner.loadScript(page.script);
+
+        // Kiểm tra và ẩn các objects cần ẩn mặc định
+        ScriptRunner.initializeObjectVisibility(page.script);
     },
 
     // Áp dụng background cho canvas

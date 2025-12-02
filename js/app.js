@@ -121,6 +121,15 @@ const App = {
             modal.show();
         });
 
+        $('#btnShowAll').on('click', () => {
+            // Hiển thị tất cả objects, bỏ qua script actions
+            const objects = ObjectManager.getAllObjects();
+            objects.forEach(obj => {
+                ObjectManager.updateObject(obj.id, { visible: true });
+                $(`.canvas-object[data-id="${obj.id}"]`).removeClass('hidden');
+            });
+        });
+
         $('#btnSaveScript').on('click', () => {
             try {
                 const scriptText = $('#scriptTextarea').val();
@@ -136,6 +145,39 @@ const App = {
         });
 
         $('#btnAddAction').on('click', () => {
+            // Clear previous values
+            $('#actionTarget').val('');
+            $('#actionX').val('');
+            $('#actionY').val('');
+            $('#actionTime').val('2000');
+            $('#moveParams').hide();
+
+            // Populate object list
+            const objects = ObjectManager.getAllObjects();
+            const $objectList = $('#objectList');
+
+            if (objects.length === 0) {
+                $objectList.html('<small class="text-muted">Không có object nào trong slide này</small>');
+            } else {
+                let html = '<div class="d-flex flex-wrap gap-2">';
+                objects.forEach(obj => {
+                    // Get display name based on object type
+                    let displayName = obj.id;
+                    if (obj.props) {
+                        if (obj.props.text) {
+                            displayName += ` (${obj.props.text.substring(0, 20)}${obj.props.text.length > 20 ? '...' : ''})`;
+                        } else if (obj.props.imageUrl) {
+                            displayName += ' (Image)';
+                        } else if (obj.props.icon) {
+                            displayName += ` (${obj.props.icon})`;
+                        }
+                    }
+                    html += `<button type="button" class="btn btn-sm btn-outline-primary object-select-btn" data-object-id="${obj.id}" title="Type: ${obj.type}">${displayName}</button>`;
+                });
+                html += '</div>';
+                $objectList.html(html);
+            }
+
             const modal = new bootstrap.Modal($('#addActionModal')[0]);
             modal.show();
         });
@@ -146,6 +188,29 @@ const App = {
             } else {
                 $('#moveParams').hide();
             }
+        });
+
+        // Handle object selection in addActionModal
+        $(document).on('click', '.object-select-btn', function() {
+            const objectId = $(this).data('object-id');
+            const $targetInput = $('#actionTarget');
+            const currentValue = $targetInput.val().trim();
+
+            if (currentValue === '') {
+                $targetInput.val(objectId);
+            } else {
+                // Check if objectId already exists
+                const existingIds = currentValue.split(',').map(id => id.trim());
+                if (!existingIds.includes(objectId)) {
+                    $targetInput.val(currentValue + ', ' + objectId);
+                }
+            }
+
+            // Visual feedback
+            $(this).addClass('btn-primary').removeClass('btn-outline-primary');
+            setTimeout(() => {
+                $(this).addClass('btn-outline-primary').removeClass('btn-primary');
+            }, 300);
         });
 
         $('#btnAddActionConfirm').on('click', () => {

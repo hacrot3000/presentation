@@ -96,7 +96,7 @@ const ObjectManager = {
             .css({
                 left: object.x + 'px',
                 top: object.y + 'px',
-                zIndex: object.zIndex
+                zIndex: object.zIndex !== undefined && object.zIndex !== null ? object.zIndex : 1
             });
 
         if (!object.draggable) {
@@ -565,7 +565,7 @@ const ObjectManager = {
                 height: objData.height,
                 draggable: objData.draggable !== false,
                 visible: objData.visible !== false,
-                zIndex: objData.zIndex || 1,
+                zIndex: objData.zIndex !== undefined && objData.zIndex !== null ? objData.zIndex : 1,
                 props: props
             };
 

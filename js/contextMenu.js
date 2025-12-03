@@ -215,14 +215,12 @@ const ContextMenuManager = {
                 $(`.canvas-object[data-id="${this.currentObjectId}"]`).css('zIndex', maxZ + 1);
                 PageManager.hasUnsavedChanges = true;
                 PageManager.updateSaveButtonState();
-                PageManager.saveCurrentPage();
                 break;
             case 'sendToBack':
                 ObjectManager.updateObject(this.currentObjectId, { zIndex: 0 });
                 $(`.canvas-object[data-id="${this.currentObjectId}"]`).css('zIndex', 0);
                 PageManager.hasUnsavedChanges = true;
                 PageManager.updateSaveButtonState();
-                PageManager.saveCurrentPage();
                 break;
             case 'toggleDraggable':
                 const newDraggable = !object.draggable;
@@ -235,7 +233,6 @@ const ContextMenuManager = {
                 }
                 PageManager.hasUnsavedChanges = true;
                 PageManager.updateSaveButtonState();
-                PageManager.saveCurrentPage();
                 break;
         }
     },
@@ -307,11 +304,19 @@ const ContextMenuManager = {
             case 'image':
                 // Đảm bảo imageUrl được hiển thị đúng
                 const imageUrl = object.props.imageUrl || '';
+                const isBase64 = imageUrl.startsWith('data:image/');
                 formHtml = `
                     ${addIdField()}
                     <div class="mb-3">
-                        <label class="form-label">${LanguageManager.t('imageUrl')}</label>
-                        <input type="text" class="form-control" id="editImageUrl" value="${imageUrl.replace(/"/g, '&quot;')}">
+                        <label class="form-label">${LanguageManager.t('imageUrl')} hoặc ${LanguageManager.t('uploadImage')}</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="editImageUrl" value="${isBase64 ? LanguageManager.t('base64Image') : imageUrl.replace(/"/g, '&quot;')}" placeholder="${LanguageManager.t('imageUrlPlaceholder')}">
+                            <input type="file" class="form-control" id="editImageFile" accept="image/*" style="display: none;">
+                            <button class="btn btn-outline-secondary" type="button" id="btnChooseImageFile">
+                                <i class="fas fa-upload"></i> ${LanguageManager.t('chooseFile')}
+                            </button>
+                        </div>
+                        <small class="text-muted">${LanguageManager.t('imageInputHint')}</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Kích thước (để trống để tự động scale)</label>
@@ -631,8 +636,173 @@ const ContextMenuManager = {
         $form.html(formHtml);
         this.editingObjectId = object.id;
 
+        // Bind event cho file input (image)
+        if (object.type === 'image') {
+            // Lấy imageUrl từ object để hiển thị preview
+            const imageUrl = object.props.imageUrl || '';
+
+            $('#btnChooseImageFile').on('click', function() {
+                $('#editImageFile').click();
+            });
+
+            $('#editImageFile').on('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Kiểm tra kích thước file (giới hạn 10MB)
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('File quá lớn! Vui lòng chọn file nhỏ hơn 10MB.');
+                        $(this).val('');
+                        return;
+                    }
+
+                    // Kiểm tra loại file
+                    if (!file.type.startsWith('image/')) {
+                        alert('Vui lòng chọn file ảnh!');
+                        $(this).val('');
+                        return;
+                    }
+
+                    // Đọc file và convert sang base64
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const base64Data = e.target.result;
+                        $('#editImageUrl').val(base64Data);
+                        // Hiển thị preview
+                        const preview = $('#editImagePreview');
+                        if (preview.length === 0) {
+                            $('#editImageUrl').after('<div id="editImagePreview" class="mt-2"><img src="' + base64Data + '" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;"></div>');
+                        } else {
+                            preview.find('img').attr('src', base64Data);
+                        }
+                    };
+                    reader.onerror = function() {
+                        alert('Lỗi khi đọc file ảnh!');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Hiển thị preview nếu đã có base64
+            if (imageUrl && imageUrl.startsWith('data:image/')) {
+                $('#editImageUrl').after('<div id="editImagePreview" class="mt-2"><img src="' + imageUrl + '" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;"></div>');
+            }
+        }
+
         const modal = new bootstrap.Modal($modal[0]);
         modal.show();
+    },
+
+    // Hàm helper để hoàn tất lưu image khi đã convert base64
+    finishSaveImage(base64Data, object) {
+        const updates = { props: {} };
+        updates.props.imageUrl = base64Data;
+
+        const widthVal = $('#editWidth').val().trim();
+        const heightVal = $('#editHeight').val().trim();
+        updates.props.width = widthVal === '' ? null : parseInt(widthVal);
+        updates.props.height = heightVal === '' ? null : parseInt(heightVal);
+
+        // Đảm bảo giữ lại tất cả props cũ khi update
+        const currentObject = ObjectManager.getObject(this.editingObjectId);
+        if (currentObject && currentObject.props) {
+            updates.props = { ...currentObject.props, ...updates.props };
+        }
+
+        // Cập nhật tọa độ nếu có
+        const newX = parseInt($('#editX').val());
+        const newY = parseInt($('#editY').val());
+        if (!isNaN(newX)) updates.x = newX;
+        if (!isNaN(newY)) updates.y = newY;
+
+        // Kiểm tra đổi ID
+        const newId = $('#editObjectId').val().trim();
+        const oldId = this.editingObjectId;
+        let idChanged = false;
+
+        if (newId !== oldId) {
+            const allObjects = ObjectManager.getAllObjects();
+            const existingObject = allObjects.find(obj => obj.id === newId);
+            if (existingObject) {
+                alert(`ID "${newId}" đã tồn tại trong trang này. Vui lòng chọn ID khác.`);
+                return;
+            }
+            idChanged = true;
+        }
+
+        if (idChanged) {
+            // Tạo object mới với ID mới
+            const newObject = {
+                ...object,
+                ...updates,
+                id: newId
+            };
+
+            // Xóa object cũ
+            ObjectManager.deleteObject(oldId);
+
+            // Thêm object mới
+            ObjectManager.objects[newId] = newObject;
+
+            // Re-render object mới
+            const $newObj = ObjectManager.renderObject(newObject);
+            $('#canvas').append($newObj);
+
+            // Cập nhật vị trí CSS
+            $newObj.css({
+                left: (newObject.x || 0) + 'px',
+                top: (newObject.y || 0) + 'px'
+            });
+
+            // Cập nhật script
+            const currentScript = ScriptRunner.currentScript || [];
+            const updatedScript = currentScript.map(action => {
+                if (action.target) {
+                    if (Array.isArray(action.target)) {
+                        return {
+                            ...action,
+                            target: action.target.map(t => t === oldId ? newId : t)
+                        };
+                    } else if (action.target === oldId) {
+                        return {
+                            ...action,
+                            target: newId
+                        };
+                    }
+                }
+                return action;
+            });
+
+            if (PageManager.pages[PageManager.currentPageId]) {
+                PageManager.pages[PageManager.currentPageId].script = updatedScript;
+                ScriptRunner.loadScript(updatedScript);
+            }
+
+            this.editingObjectId = newId;
+        } else {
+            ObjectManager.updateObject(this.editingObjectId, updates);
+
+            // Re-render object
+            const $oldObj = $(`.canvas-object[data-id="${this.editingObjectId}"]`);
+            const newObject = ObjectManager.getObject(this.editingObjectId);
+            const $newObj = ObjectManager.renderObject(newObject);
+            $oldObj.replaceWith($newObj);
+
+            // Cập nhật vị trí CSS
+            if (!isNaN(newX) || !isNaN(newY)) {
+                $newObj.css({
+                    left: (newObject.x || 0) + 'px',
+                    top: (newObject.y || 0) + 'px'
+                });
+            }
+        }
+
+        // Đánh dấu có thay đổi chưa lưu
+        PageManager.hasUnsavedChanges = true;
+        PageManager.updateSaveButtonState();
+        PageManager.saveCurrentPage();
+
+        const modal = bootstrap.Modal.getInstance($('#editObjectModal')[0]);
+        modal.hide();
     },
 
     saveEdit() {
@@ -672,8 +842,9 @@ const ContextMenuManager = {
                 break;
 
             case 'image':
+                // Lấy giá trị từ input (có thể là URL hoặc base64)
                 const imageUrlVal = $('#editImageUrl').val().trim();
-                // Chỉ update imageUrl nếu có giá trị, không thì giữ nguyên
+                // Nếu là base64 hoặc URL hợp lệ, lưu vào
                 if (imageUrlVal !== '') {
                     updates.props.imageUrl = imageUrlVal;
                 } else {

@@ -248,6 +248,7 @@ const PageManager = {
         const pageData = {
             objects: objects,
             script: ScriptRunner.currentScript,
+            title: this.pages[this.currentPageId]?.title || '', // Giữ lại title
             background: this.pages[this.currentPageId].background || {
                 color: '#f5f5f5',
                 imageUrl: '',

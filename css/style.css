@@ -280,8 +280,13 @@
 }
 
 /* Language buttons */
-.btn-group .btn.active {
+.btn-group .btn.active,
+.dropdown-item.active {
     background-color: #007bff;
     color: white;
-    border-color: #007bff;
+}
+
+.dropdown-item.active:hover {
+    background-color: #0056b3;
+    color: white;
 }

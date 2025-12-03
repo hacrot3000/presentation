@@ -10,7 +10,7 @@ const LanguageManager = {
             prev: 'Trước',
             next: 'Sau',
             addPage: 'Thêm trang mới',
-            saveState: 'Lưu trạng thái',
+            saveState: 'Lưu và tải xuống',
             scriptEditor: 'Trình chỉnh sửa Script',
             page: 'Trang',
             of: '/',
@@ -52,7 +52,7 @@ const LanguageManager = {
             y: 'Y',
             time: 'Thời gian (ms)',
             add: 'Thêm',
-            saveStateTitle: 'Lưu trạng thái',
+            saveStateTitle: 'Lưu và tải xuống',
             downloadJSON: 'Tải xuống file JSON',
             editBackgroundTitle: 'Chỉnh sửa Nền',
             backgroundColor: 'Màu nền',
@@ -94,7 +94,7 @@ const LanguageManager = {
             importError: 'Dữ liệu không hợp lệ!',
             fileReadError: 'Lỗi đọc file: {error}',
             importConfirm: 'Bạn có chắc muốn import file JSON? Dữ liệu hiện tại sẽ bị ghi đè.',
-            importState: 'Import',
+            importState: 'Mở file data',
 
             // Action Types
             show: 'Hiển thị',
@@ -107,6 +107,15 @@ const LanguageManager = {
             textState0: 'Văn bản Trạng thái 0 (Đỏ)',
             textState1: 'Văn bản Trạng thái 1 (Vàng)',
             textState2: 'Văn bản Trạng thái 2 (Xanh)',
+
+            // Header
+            actions: 'Hành động',
+            settings: 'Cài đặt',
+            autoAdvancePage: 'Tự động chuyển trang',
+            language: 'Ngôn ngữ',
+            vietnamese: 'Tiếng Việt',
+            english: 'English',
+            showAll: 'Hiển thị tất cả',
 
             // Add Action Modal
             objectListTitle: 'Danh sách Objects trong slide hiện tại:',
@@ -131,7 +140,7 @@ const LanguageManager = {
             prev: 'Prev',
             next: 'Next',
             addPage: 'Add New Page',
-            saveState: 'Save State',
+            saveState: 'Save and Download',
             scriptEditor: 'Script Editor',
             page: 'Page',
             of: '/',
@@ -173,7 +182,7 @@ const LanguageManager = {
             y: 'Y',
             time: 'Time (ms)',
             add: 'Add',
-            saveStateTitle: 'Save State',
+            saveStateTitle: 'Save and Download',
             downloadJSON: 'Download JSON File',
             editBackgroundTitle: 'Edit Background',
             backgroundColor: 'Background Color',
@@ -215,7 +224,7 @@ const LanguageManager = {
             importError: 'Invalid data!',
             fileReadError: 'File read error: {error}',
             importConfirm: 'Are you sure you want to import JSON file? Current data will be overwritten.',
-            importState: 'Import',
+            importState: 'Open data file',
 
             // Action Types
             show: 'Show',
@@ -229,6 +238,14 @@ const LanguageManager = {
             textState1: 'Text State 1 (Yellow)',
             textState2: 'Text State 2 (Green)',
 
+            // Header
+            actions: 'Actions',
+            settings: 'Settings',
+            autoAdvancePage: 'Auto advance page',
+            language: 'Language',
+            vietnamese: 'Vietnamese',
+            english: 'English',
+            showAll: 'Show All',
             // Add Action Modal
             objectListTitle: 'Objects in current slide:',
             loading: 'Loading...',

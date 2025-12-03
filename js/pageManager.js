@@ -51,6 +51,10 @@ const PageManager = {
         StorageManager.saveCurrentPage(pageId);
         this.renderCurrentPage();
         this.updatePageInfo();
+
+        // Reset script runner khi chuyển trang
+        ScriptRunner.reset();
+
         return true;
     },
 

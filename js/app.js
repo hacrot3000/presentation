@@ -46,8 +46,7 @@ const App = {
 
     updateLanguageButtons() {
         const currentLang = LanguageManager.getCurrentLanguage();
-        $('#btnLangVI').removeClass('active');
-        $('#btnLangEN').removeClass('active');
+        $('#btnLangVI, #btnLangEN').removeClass('active');
         if (currentLang === 'vi') {
             $('#btnLangVI').addClass('active');
         } else {
@@ -92,7 +91,14 @@ const App = {
             PageManager.addNewPage();
         });
 
-        $('#btnSaveState').on('click', () => {
+        // Quick Save - chỉ lưu vào storage, không mở popup
+        $('#btnQuickSave').on('click', () => {
+            PageManager.saveCurrentPage();
+        });
+
+        // Save State - lưu và mở popup
+        $('#btnSaveState').on('click', (e) => {
+            e.preventDefault();
             PageManager.saveCurrentPage();
             const data = PageManager.exportData();
             $('#saveStateTextarea').val(JSON.stringify(data, null, 2));
@@ -113,7 +119,8 @@ const App = {
             URL.revokeObjectURL(url);
         });
 
-        $('#btnScriptEditor').on('click', () => {
+        $('#btnScriptEditor').on('click', (e) => {
+            e.preventDefault();
             PageManager.saveCurrentPage();
             const page = PageManager.pages[PageManager.currentPageId];
             $('#scriptTextarea').val(JSON.stringify(page.script || [], null, 2));
@@ -121,7 +128,8 @@ const App = {
             modal.show();
         });
 
-        $('#btnShowAll').on('click', () => {
+        $('#btnShowAll').on('click', (e) => {
+            e.preventDefault();
             // Hiển thị tất cả objects, bỏ qua script actions
             const objects = ObjectManager.getAllObjects();
             objects.forEach(obj => {
@@ -470,8 +478,20 @@ const App = {
             ContextMenuManager.saveBackground();
         });
 
+        // Auto advance page checkbox
+        // Load giá trị từ localStorage
+        const savedAutoAdvance = localStorage.getItem('autoAdvancePage');
+        if (savedAutoAdvance !== null) {
+            $('#chkAutoAdvancePage').prop('checked', savedAutoAdvance === 'true');
+        }
+
+        $('#chkAutoAdvancePage').on('change', function() {
+            localStorage.setItem('autoAdvancePage', $(this).is(':checked') ? 'true' : 'false');
+        });
+
         // Language switcher
-        $('#btnLangVI, #btnLangEN').on('click', function() {
+        $('#btnLangVI, #btnLangEN').on('click', function(e) {
+            e.preventDefault();
             const lang = $(this).data('lang');
             LanguageManager.setLanguage(lang);
             App.updateLanguageButtons();

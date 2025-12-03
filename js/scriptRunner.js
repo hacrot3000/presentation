@@ -66,7 +66,14 @@ const ScriptRunner = {
     // Chạy action tiếp theo
     runNext() {
         if (this.currentIndex >= this.currentScript.length) {
-            console.log('Script đã chạy hết');
+            // Kiểm tra xem có bật tự động chuyển trang không
+            const autoAdvance = localStorage.getItem('autoAdvancePage') !== 'false'; // Mặc định là true
+            if (autoAdvance) {
+                // Tự động chuyển sang trang sau
+                PageManager.nextPage();
+            } else {
+                console.log('Script đã chạy hết');
+            }
             return;
         }
 

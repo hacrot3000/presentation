@@ -160,7 +160,7 @@ const App = {
             const $objectList = $('#objectList');
 
             if (objects.length === 0) {
-                $objectList.html('<small class="text-muted">Không có object nào trong slide này</small>');
+                $objectList.html(`<small class="text-muted">${LanguageManager.t('noObjectsInSlide')}</small>`);
             } else {
                 let html = '<div class="d-flex flex-wrap gap-2">';
                 objects.forEach(obj => {
@@ -190,6 +190,12 @@ const App = {
             if (actionType === 'move') {
                 $('#moveParams').show();
                 $('#effectParams').hide();
+                // Nếu đã có nhiều objects được chọn, chỉ giữ lại object đầu tiên
+                const target = $('#actionTarget').val().trim();
+                if (target) {
+                    const firstTarget = target.split(',')[0].trim();
+                    $('#actionTarget').val(firstTarget);
+                }
             } else if (actionType === 'show' || actionType === 'hide') {
                 $('#moveParams').hide();
                 $('#effectParams').show();
@@ -211,15 +217,22 @@ const App = {
         $(document).on('click', '.object-select-btn', function() {
             const objectId = $(this).data('object-id');
             const $targetInput = $('#actionTarget');
+            const actionType = $('#actionType').val();
             const currentValue = $targetInput.val().trim();
 
-            if (currentValue === '') {
+            // Nếu là move, chỉ cho phép chọn 1 object
+            if (actionType === 'move') {
                 $targetInput.val(objectId);
             } else {
-                // Check if objectId already exists
-                const existingIds = currentValue.split(',').map(id => id.trim());
-                if (!existingIds.includes(objectId)) {
-                    $targetInput.val(currentValue + ', ' + objectId);
+                // show/hide có thể chọn nhiều
+                if (currentValue === '') {
+                    $targetInput.val(objectId);
+                } else {
+                    // Check if objectId already exists
+                    const existingIds = currentValue.split(',').map(id => id.trim());
+                    if (!existingIds.includes(objectId)) {
+                        $targetInput.val(currentValue + ', ' + objectId);
+                    }
                 }
             }
 
@@ -229,6 +242,176 @@ const App = {
                 $(this).addClass('btn-outline-primary').removeClass('btn-primary');
             }, 300);
         });
+
+        // Visual Positioning Mode
+        let visualPositioningState = {
+            active: false,
+            selectedObjectId: null,
+            originalStates: {},
+            originalZIndexes: {},
+            scriptEditorModalInstance: null // Lưu reference đến modal Script Editor
+        };
+
+        $('#btnVisualPosition').on('click', () => {
+            const target = $('#actionTarget').val().trim();
+            if (!target) {
+                alert('Vui lòng chọn object trước');
+                return;
+            }
+
+            // Lấy object ID (nếu có nhiều, lấy cái đầu tiên)
+            const objectId = target.split(',')[0].trim();
+            const object = ObjectManager.getObject(objectId);
+            if (!object) {
+                alert('Object không tồn tại');
+                return;
+            }
+
+            // Lưu trạng thái ban đầu
+            visualPositioningState.active = true;
+            visualPositioningState.selectedObjectId = objectId;
+            visualPositioningState.originalStates = {};
+            visualPositioningState.originalZIndexes = {};
+
+            // Lưu trạng thái của tất cả objects
+            const allObjects = ObjectManager.getAllObjects();
+            allObjects.forEach(obj => {
+                const $obj = $(`.canvas-object[data-id="${obj.id}"]`);
+                visualPositioningState.originalStates[obj.id] = {
+                    visible: obj.visible,
+                    x: obj.x,
+                    y: obj.y,
+                    zIndex: obj.zIndex || 1,
+                    draggable: obj.draggable !== false
+                };
+                visualPositioningState.originalZIndexes[obj.id] = $obj.css('z-index') || obj.zIndex || 1;
+            });
+
+            // Ẩn 2 modal và lưu reference
+            const addActionModal = bootstrap.Modal.getInstance($('#addActionModal')[0]);
+            if (addActionModal) addActionModal.hide();
+            const scriptEditorModal = bootstrap.Modal.getInstance($('#scriptEditorModal')[0]);
+            if (scriptEditorModal) {
+                visualPositioningState.scriptEditorModalInstance = scriptEditorModal;
+                scriptEditorModal.hide();
+            } else {
+                // Nếu chưa có instance, tạo mới
+                visualPositioningState.scriptEditorModalInstance = new bootstrap.Modal($('#scriptEditorModal')[0]);
+            }
+
+            // Hiển thị tất cả objects
+            allObjects.forEach(obj => {
+                const $obj = $(`.canvas-object[data-id="${obj.id}"]`);
+                $obj.removeClass('hidden').css({ display: 'block', opacity: '', visibility: 'visible' });
+                ObjectManager.updateObject(obj.id, { visible: true });
+            });
+
+            // Đánh dấu object được chọn và đưa lên trên cùng
+            const $selectedObj = $(`.canvas-object[data-id="${objectId}"]`);
+            $selectedObj.addClass('visual-positioning-selected');
+            const maxZIndex = Math.max(...allObjects.map(o => parseInt(visualPositioningState.originalZIndexes[o.id]) || 1));
+            $selectedObj.css('z-index', maxZIndex + 1000);
+
+            // Hiển thị overlay
+            $('#visualPositionOverlay').show();
+
+            // Đảm bảo object có thể kéo được
+            const selectedObject = ObjectManager.getObject(objectId);
+            if (!selectedObject.draggable) {
+                // Tạm thời enable draggable
+                ObjectManager.updateObject(objectId, { draggable: true });
+            }
+        });
+
+        $('#btnConfirmPosition').on('click', () => {
+            if (!visualPositioningState.active || !visualPositioningState.selectedObjectId) return;
+
+            const object = ObjectManager.getObject(visualPositioningState.selectedObjectId);
+            if (object) {
+                // Lấy tọa độ hiện tại
+                $('#actionX').val(object.x);
+                $('#actionY').val(object.y);
+            }
+
+            // Restore trạng thái
+            restoreVisualPositioningState();
+
+            // Hiển thị lại cả 2 modal
+            const addActionModal = new bootstrap.Modal($('#addActionModal')[0]);
+            addActionModal.show();
+
+            // Hiển thị lại modal Script Editor nếu có
+            if (visualPositioningState.scriptEditorModalInstance) {
+                visualPositioningState.scriptEditorModalInstance.show();
+            }
+        });
+
+        $('#btnCancelPosition').on('click', () => {
+            restoreVisualPositioningState();
+
+            // Hiển thị lại cả 2 modal
+            const addActionModal = new bootstrap.Modal($('#addActionModal')[0]);
+            addActionModal.show();
+
+            // Hiển thị lại modal Script Editor nếu có
+            if (visualPositioningState.scriptEditorModalInstance) {
+                visualPositioningState.scriptEditorModalInstance.show();
+            }
+        });
+
+        function restoreVisualPositioningState() {
+            if (!visualPositioningState.active) return;
+
+            // Restore trạng thái của tất cả objects
+            Object.keys(visualPositioningState.originalStates).forEach(objId => {
+                const originalState = visualPositioningState.originalStates[objId];
+                const originalZIndex = visualPositioningState.originalZIndexes[objId];
+                const $obj = $(`.canvas-object[data-id="${objId}"]`);
+
+                // Restore position và draggable
+                ObjectManager.updateObject(objId, {
+                    x: originalState.x,
+                    y: originalState.y,
+                    visible: originalState.visible,
+                    zIndex: originalState.zIndex,
+                    draggable: originalState.draggable
+                });
+
+                // Restore CSS
+                $obj.css({
+                    left: originalState.x + 'px',
+                    top: originalState.y + 'px',
+                    zIndex: originalZIndex
+                });
+
+                // Restore draggable class
+                if (!originalState.draggable) {
+                    $obj.addClass('not-draggable');
+                } else {
+                    $obj.removeClass('not-draggable');
+                }
+
+                // Restore visibility
+                if (!originalState.visible) {
+                    $obj.addClass('hidden').css({ display: 'none' });
+                } else {
+                    $obj.removeClass('hidden');
+                }
+            });
+
+            // Remove visual positioning class
+            $(`.canvas-object.visual-positioning-selected`).removeClass('visual-positioning-selected');
+
+            // Ẩn overlay
+            $('#visualPositionOverlay').hide();
+
+            // Reset state (giữ lại scriptEditorModalInstance để có thể hiển thị lại)
+            visualPositioningState.active = false;
+            visualPositioningState.selectedObjectId = null;
+            visualPositioningState.originalStates = {};
+            visualPositioningState.originalZIndexes = {};
+            // Không reset scriptEditorModalInstance ở đây, sẽ reset sau khi đóng modal
+        }
 
         $('#btnAddActionConfirm').on('click', () => {
             const type = $('#actionType').val();
@@ -260,8 +443,18 @@ const App = {
                 currentScript.push(action);
                 $('#scriptTextarea').val(JSON.stringify(currentScript, null, 2));
 
-                const modal = bootstrap.Modal.getInstance($('#addActionModal')[0]);
-                modal.hide();
+                // Đóng modal "Thêm Hành động"
+                const addActionModal = bootstrap.Modal.getInstance($('#addActionModal')[0]);
+                if (addActionModal) addActionModal.hide();
+
+                // Đảm bảo modal "Trình chỉnh sửa Script" vẫn hiển thị
+                // Kiểm tra xem modal có đang hiển thị không
+                const scriptEditorModal = bootstrap.Modal.getInstance($('#scriptEditorModal')[0]);
+                if (!scriptEditorModal || !$('#scriptEditorModal').hasClass('show')) {
+                    // Nếu không có instance hoặc không đang hiển thị, hiển thị lại
+                    const newScriptEditorModal = new bootstrap.Modal($('#scriptEditorModal')[0]);
+                    newScriptEditorModal.show();
+                }
             } catch (e) {
                 alert(LanguageManager.t('jsonError', { error: e.message }));
             }

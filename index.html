@@ -104,6 +104,18 @@
         <!-- Canvas bên phải -->
         <div class="canvas-container flex-grow-1 position-relative" id="canvasContainer">
             <div class="canvas bg-white" id="canvas"></div>
+            <!-- Visual Positioning Overlay -->
+            <div id="visualPositionOverlay" style="display: none; position: absolute; top: 20px; right: 20px; z-index: 10002; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                <p class="mb-2"><strong data-i18n="visualPositionInstruction">Kéo thả object để chọn vị trí</strong></p>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-success" id="btnConfirmPosition">
+                        <i class="fas fa-check"></i> <span data-i18n="confirm">Xác nhận</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btnCancelPosition">
+                        <i class="fas fa-times"></i> <span data-i18n="cancel">Hủy</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -183,20 +195,20 @@
                         <input type="text" class="form-control" id="actionTarget">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Danh sách Objects trong slide hiện tại:</label>
+                        <label class="form-label" data-i18n="objectListTitle">Danh sách Objects trong slide hiện tại:</label>
                         <div id="objectList" class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
-                            <small class="text-muted">Đang tải...</small>
+                            <small class="text-muted" data-i18n="loading">Đang tải...</small>
                         </div>
-                        <small class="text-muted">Click vào object để thêm vào Target</small>
+                        <small class="text-muted" data-i18n="clickToAddTarget">Click vào object để thêm vào Target</small>
                     </div>
                     <div class="mb-3" id="effectParams" style="display: none;">
-                        <label class="form-label">Hiệu ứng</label>
+                        <label class="form-label" data-i18n="effect">Hiệu ứng</label>
                         <select class="form-select" id="actionEffect">
-                            <option value="none">Không hiệu ứng (ngay lập tức)</option>
-                            <option value="fade">Fade (mờ dần)</option>
-                            <option value="slide">Slide (trượt)</option>
+                            <option value="none" data-i18n="effectNone">Không hiệu ứng (ngay lập tức)</option>
+                            <option value="fade" data-i18n="effectFade">Fade (mờ dần)</option>
+                            <option value="slide" data-i18n="effectSlide">Slide (trượt)</option>
                         </select>
-                        <label class="form-label mt-2">Thời gian hiệu ứng (ms)</label>
+                        <label class="form-label mt-2" data-i18n="effectDuration">Thời gian hiệu ứng (ms)</label>
                         <input type="number" class="form-control" id="actionDuration" value="500" min="0">
                     </div>
                     <div class="mb-3" id="moveParams" style="display: none;">
@@ -204,6 +216,11 @@
                         <input type="number" class="form-control" id="actionX">
                         <label class="form-label mt-2" data-i18n="y">Y</label>
                         <input type="number" class="form-control" id="actionY">
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="btnVisualPosition">
+                                <i class="fas fa-hand-pointer"></i> <span data-i18n="visualPosition">Chọn vị trí trực quan</span>
+                            </button>
+                        </div>
                         <label class="form-label mt-2" data-i18n="time">Time (ms)</label>
                         <input type="number" class="form-control" id="actionTime" value="2000">
                     </div>

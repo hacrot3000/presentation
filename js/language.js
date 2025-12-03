@@ -47,7 +47,7 @@ const LanguageManager = {
             saveScript: 'Lưu Script',
             addActionTitle: 'Thêm Hành động',
             actionType: 'Loại Hành động',
-            target: 'Đối tượng (Object ID, cách nhau bằng dấu phẩy cho show/hide)',
+            target: 'Đối tượng',
             x: 'X',
             y: 'Y',
             time: 'Thời gian (ms)',
@@ -106,7 +106,22 @@ const LanguageManager = {
             textWhenOn: 'Văn bản khi BẬT',
             textState0: 'Văn bản Trạng thái 0 (Đỏ)',
             textState1: 'Văn bản Trạng thái 1 (Vàng)',
-            textState2: 'Văn bản Trạng thái 2 (Xanh)'
+            textState2: 'Văn bản Trạng thái 2 (Xanh)',
+
+            // Add Action Modal
+            objectListTitle: 'Danh sách Objects trong slide hiện tại:',
+            loading: 'Đang tải...',
+            clickToAddTarget: 'Click vào object để thêm vào Target',
+            effect: 'Hiệu ứng',
+            effectNone: 'Không hiệu ứng (ngay lập tức)',
+            effectFade: 'Fade (mờ dần)',
+            effectSlide: 'Slide (trượt)',
+            effectDuration: 'Thời gian hiệu ứng (ms)',
+            visualPosition: 'Chọn vị trí trực quan',
+            visualPositionInstruction: 'Kéo thả object để chọn vị trí',
+            confirm: 'Xác nhận',
+            cancel: 'Hủy',
+            noObjectsInSlide: 'Không có object nào trong slide này'
         },
         en: {
             // App
@@ -153,7 +168,7 @@ const LanguageManager = {
             saveScript: 'Save Script',
             addActionTitle: 'Add Action',
             actionType: 'Action Type',
-            target: 'Target (Object ID, comma-separated for show/hide)',
+            target: 'Target',
             x: 'X',
             y: 'Y',
             time: 'Time (ms)',
@@ -212,7 +227,22 @@ const LanguageManager = {
             textWhenOn: 'Text when ON',
             textState0: 'Text State 0 (Red)',
             textState1: 'Text State 1 (Yellow)',
-            textState2: 'Text State 2 (Green)'
+            textState2: 'Text State 2 (Green)',
+
+            // Add Action Modal
+            objectListTitle: 'Objects in current slide:',
+            loading: 'Loading...',
+            clickToAddTarget: 'Click on object to add to Target',
+            effect: 'Effect',
+            effectNone: 'No effect (instant)',
+            effectFade: 'Fade',
+            effectSlide: 'Slide',
+            effectDuration: 'Effect duration (ms)',
+            visualPosition: 'Select position visually',
+            visualPositionInstruction: 'Drag and drop object to select position',
+            confirm: 'Confirm',
+            cancel: 'Cancel',
+            noObjectsInSlide: 'No objects in this slide'
         }
     },
 

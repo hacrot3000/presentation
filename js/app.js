@@ -97,6 +97,27 @@ const App = {
             PageManager.addNewPage();
         });
 
+        // Di chuyển trang
+        $('#btnMovePageUp').on('click', (e) => {
+            e.preventDefault();
+            PageManager.movePageUp();
+        });
+
+        $('#btnMovePageDown').on('click', (e) => {
+            e.preventDefault();
+            PageManager.movePageDown();
+        });
+
+        // Xóa trang
+        $('#btnDeletePage').on('click', (e) => {
+            e.preventDefault();
+            if (PageManager.deletePage(PageManager.currentPageId)) {
+                // Nếu xóa thành công, đã được chuyển trang tự động trong deletePage()
+                PageManager.hasUnsavedChanges = true;
+                PageManager.updateSaveButtonState();
+            }
+        });
+
         // Quick Save - chỉ lưu vào storage, không mở popup
         $('#btnQuickSave').on('click', () => {
             PageManager.saveCurrentPage();

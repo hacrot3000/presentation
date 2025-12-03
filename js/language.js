@@ -14,6 +14,9 @@ const LanguageManager = {
             scriptEditor: 'Trình chỉnh sửa Script',
             page: 'Trang',
             of: '/',
+            movePageUp: 'Di chuyển trang lên',
+            movePageDown: 'Di chuyển trang xuống',
+            deletePage: 'Xóa trang',
 
             // Sidebar
             addObject: 'Thêm Object',
@@ -149,6 +152,9 @@ const LanguageManager = {
             scriptEditor: 'Script Editor',
             page: 'Page',
             of: '/',
+            movePageUp: 'Move Page Up',
+            movePageDown: 'Move Page Down',
+            deletePage: 'Delete Page',
 
             // Sidebar
             addObject: 'Add Object',

@@ -2,6 +2,7 @@
 const PageManager = {
     pages: {},
     currentPageId: null,
+    pageOrder: [], // Mảng lưu thứ tự các trang [pageId1, pageId2, ...]
     // Lưu trạng thái tạm của từng trang (không lưu vào storage)
     pageStates: {}, // { pageId: { objectVisibility: {}, scriptIndex: 0, objectPositions: {} } }
     pendingNavigation: null, // Lưu pageId muốn chuyển đến khi có thay đổi chưa lưu
@@ -21,11 +22,15 @@ const PageManager = {
         if (Object.keys(this.pages).length === 0) {
             this.createPage('page_1');
         }
+
+        // Khởi tạo pageOrder từ storage hoặc từ keys của pages
+        this.loadPageOrder();
+
         const savedCurrentPage = StorageManager.loadCurrentPage();
         if (savedCurrentPage && this.pages[savedCurrentPage]) {
             this.currentPageId = savedCurrentPage;
         } else {
-            this.currentPageId = Object.keys(this.pages)[0];
+            this.currentPageId = this.pageOrder[0] || Object.keys(this.pages)[0];
         }
         this.renderCurrentPage();
     },
@@ -55,6 +60,12 @@ const PageManager = {
     // Chuyển đến trang
     goToPage(pageId, skipCheck = false) {
         if (!this.pages[pageId]) return false;
+
+        // Đảm bảo pageId có trong pageOrder
+        if (!this.pageOrder.includes(pageId)) {
+            this.pageOrder.push(pageId);
+            this.savePageOrder();
+        }
 
         // Kiểm tra có thay đổi chưa lưu (trừ khi skipCheck = true)
         if (!skipCheck && this.hasUnsavedChanges) {
@@ -149,19 +160,17 @@ const PageManager = {
 
     // Trang trước
     prevPage() {
-        const pageIds = Object.keys(this.pages).sort();
-        const currentIndex = pageIds.indexOf(this.currentPageId);
+        const currentIndex = this.pageOrder.indexOf(this.currentPageId);
         if (currentIndex > 0) {
-            this.goToPage(pageIds[currentIndex - 1]);
+            this.goToPage(this.pageOrder[currentIndex - 1]);
         }
     },
 
-    // Trang sau
+    // Chuyển đến trang sau
     nextPage() {
-        const pageIds = Object.keys(this.pages).sort();
-        const currentIndex = pageIds.indexOf(this.currentPageId);
-        if (currentIndex < pageIds.length - 1) {
-            this.goToPage(pageIds[currentIndex + 1]);
+        const currentIndex = this.pageOrder.indexOf(this.currentPageId);
+        if (currentIndex < this.pageOrder.length - 1) {
+            this.goToPage(this.pageOrder[currentIndex + 1]);
         }
     },
 
@@ -268,9 +277,8 @@ const PageManager = {
 
     // Cập nhật thông tin trang
     updatePageInfo() {
-        const pageIds = Object.keys(this.pages).sort();
-        const currentIndex = pageIds.indexOf(this.currentPageId) + 1;
-        const totalPages = pageIds.length;
+        const currentIndex = this.pageOrder.indexOf(this.currentPageId) + 1;
+        const totalPages = this.pageOrder.length;
         const pageText = LanguageManager.t('page');
         const ofText = LanguageManager.t('of');
         $('#pageInfo').text(`${pageText} ${currentIndex} ${ofText} ${totalPages}`);
@@ -296,9 +304,54 @@ const PageManager = {
         }
     },
 
-    // Thêm trang mới
+    // Load thứ tự trang từ storage
+    loadPageOrder() {
+        const savedOrder = localStorage.getItem('presentation_page_order');
+        if (savedOrder) {
+            try {
+                const order = JSON.parse(savedOrder);
+                // Kiểm tra xem tất cả pageId trong order có tồn tại không
+                const validOrder = order.filter(pageId => this.pages[pageId]);
+                // Thêm các pageId mới (nếu có) vào cuối
+                const allPageIds = Object.keys(this.pages);
+                allPageIds.forEach(pageId => {
+                    if (!validOrder.includes(pageId)) {
+                        validOrder.push(pageId);
+                    }
+                });
+                this.pageOrder = validOrder;
+            } catch (e) {
+                // Nếu parse lỗi, tạo order từ keys
+                this.pageOrder = Object.keys(this.pages).sort();
+            }
+        } else {
+            // Nếu chưa có order, tạo từ keys
+            this.pageOrder = Object.keys(this.pages).sort();
+        }
+        this.savePageOrder();
+    },
+
+    // Lưu thứ tự trang vào storage
+    savePageOrder() {
+        localStorage.setItem('presentation_page_order', JSON.stringify(this.pageOrder));
+    },
+
+    // Thêm trang mới (chèn vào sau trang hiện tại)
     addNewPage() {
         const newPageId = this.createPage();
+
+        // Tìm index của trang hiện tại trong pageOrder
+        const currentIndex = this.pageOrder.indexOf(this.currentPageId);
+
+        // Chèn trang mới vào sau trang hiện tại
+        if (currentIndex >= 0) {
+            this.pageOrder.splice(currentIndex + 1, 0, newPageId);
+        } else {
+            // Nếu không tìm thấy, thêm vào cuối
+            this.pageOrder.push(newPageId);
+        }
+
+        this.savePageOrder();
         this.goToPage(newPageId);
     },
 
@@ -313,12 +366,55 @@ const PageManager = {
             delete this.pages[pageId];
             StorageManager.deletePage(pageId);
 
+            // Xóa khỏi pageOrder
+            const index = this.pageOrder.indexOf(pageId);
+            if (index >= 0) {
+                this.pageOrder.splice(index, 1);
+            }
+            this.savePageOrder();
+
             if (this.currentPageId === pageId) {
-                const pageIds = Object.keys(this.pages).sort();
-                this.goToPage(pageIds[0]);
+                // Chuyển đến trang trước đó hoặc trang đầu tiên
+                if (index > 0) {
+                    this.goToPage(this.pageOrder[index - 1]);
+                } else if (this.pageOrder.length > 0) {
+                    this.goToPage(this.pageOrder[0]);
+                }
             }
 
             this.updatePageInfo();
+            return true;
+        }
+        return false;
+    },
+
+    // Di chuyển trang lên trên
+    movePageUp() {
+        const currentIndex = this.pageOrder.indexOf(this.currentPageId);
+        if (currentIndex > 0) {
+            // Đổi chỗ với trang trước đó
+            [this.pageOrder[currentIndex - 1], this.pageOrder[currentIndex]] =
+            [this.pageOrder[currentIndex], this.pageOrder[currentIndex - 1]];
+            this.savePageOrder();
+            this.updatePageInfo();
+            this.hasUnsavedChanges = true;
+            this.updateSaveButtonState();
+            return true;
+        }
+        return false;
+    },
+
+    // Di chuyển trang xuống dưới
+    movePageDown() {
+        const currentIndex = this.pageOrder.indexOf(this.currentPageId);
+        if (currentIndex < this.pageOrder.length - 1) {
+            // Đổi chỗ với trang sau đó
+            [this.pageOrder[currentIndex], this.pageOrder[currentIndex + 1]] =
+            [this.pageOrder[currentIndex + 1], this.pageOrder[currentIndex]];
+            this.savePageOrder();
+            this.updatePageInfo();
+            this.hasUnsavedChanges = true;
+            this.updateSaveButtonState();
             return true;
         }
         return false;
@@ -331,7 +427,8 @@ const PageManager = {
         const savedPages = StorageManager.loadAllPages();
         return {
             pages: savedPages || this.pages,
-            currentPage: this.currentPageId
+            currentPage: this.currentPageId,
+            pageOrder: this.pageOrder || Object.keys(savedPages || this.pages).sort()
         };
     },
 
@@ -353,6 +450,24 @@ const PageManager = {
             });
 
             this.currentPageId = data.currentPage || Object.keys(this.pages)[0];
+
+            // Khôi phục pageOrder từ data hoặc tạo mới
+            if (data.pageOrder && Array.isArray(data.pageOrder)) {
+                // Kiểm tra xem tất cả pageId trong order có tồn tại không
+                const validOrder = data.pageOrder.filter(pageId => this.pages[pageId]);
+                // Thêm các pageId mới (nếu có) vào cuối
+                const allPageIds = Object.keys(this.pages);
+                allPageIds.forEach(pageId => {
+                    if (!validOrder.includes(pageId)) {
+                        validOrder.push(pageId);
+                    }
+                });
+                this.pageOrder = validOrder;
+            } else {
+                // Nếu không có pageOrder, tạo từ keys
+                this.pageOrder = Object.keys(this.pages).sort();
+            }
+            this.savePageOrder();
 
             // Lưu vào storage
             Object.keys(this.pages).forEach(pageId => {

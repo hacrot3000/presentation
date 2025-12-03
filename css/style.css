@@ -115,11 +115,18 @@
 }
 
 .object-toggle {
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
     gap: 8px;
     padding: 5px;
     user-select: none;
+    white-space: nowrap;
+}
+
+.object-toggle > span {
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .object-toggle-switch {
@@ -130,6 +137,7 @@
     position: relative;
     cursor: pointer;
     transition: background-color 0.3s;
+    flex-shrink: 0;
 }
 
 .object-toggle-switch.active {
@@ -153,11 +161,18 @@
 }
 
 .object-toggle-3state {
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
     gap: 8px;
     padding: 5px;
     user-select: none;
+    white-space: nowrap;
+}
+
+.object-toggle-3state > span {
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .object-toggle-3state-switch {
@@ -168,6 +183,7 @@
     position: relative;
     cursor: pointer;
     transition: background-color 0.3s;
+    flex-shrink: 0;
 }
 
 .object-toggle-3state-switch.state-0 {

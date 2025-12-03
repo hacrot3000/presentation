@@ -254,6 +254,17 @@ const ContextMenuManager = {
         // Tạo form động theo type
         let formHtml = '';
 
+        // Helper function để thêm trường ID
+        const addIdField = () => {
+            return `
+                <div class="mb-3">
+                    <label class="form-label fw-bold">ID</label>
+                    <input type="text" class="form-control" id="editObjectId" value="${object.id || ''}" required>
+                    <small class="text-muted">ID phải duy nhất trong trang</small>
+                </div>
+            `;
+        };
+
         // Helper function để thêm trường tọa độ
         const addPositionFields = () => {
             return `
@@ -276,6 +287,7 @@ const ContextMenuManager = {
         switch(object.type) {
             case 'text':
                 formHtml = `
+                    ${addIdField()}
                     <div class="mb-3">
                         <label class="form-label">${LanguageManager.t('textLabel')}</label>
                         <input type="text" class="form-control" id="editText" value="${object.props.text || ''}">
@@ -296,25 +308,32 @@ const ContextMenuManager = {
                 // Đảm bảo imageUrl được hiển thị đúng
                 const imageUrl = object.props.imageUrl || '';
                 formHtml = `
+                    ${addIdField()}
                     <div class="mb-3">
                         <label class="form-label">${LanguageManager.t('imageUrl')}</label>
                         <input type="text" class="form-control" id="editImageUrl" value="${imageUrl.replace(/"/g, '&quot;')}">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">${LanguageManager.t('width')} (để trống để tự động scale)</label>
-                        <input type="number" class="form-control" id="editWidth" value="${object.props.width !== null && object.props.width !== undefined ? object.props.width : ''}" placeholder="Tự động">
+                        <label class="form-label">Kích thước (để trống để tự động scale)</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="form-label small">${LanguageManager.t('width')}</label>
+                                <input type="number" class="form-control" id="editWidth" value="${object.props.width !== null && object.props.width !== undefined ? object.props.width : ''}" placeholder="Tự động">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small">${LanguageManager.t('height')}</label>
+                                <input type="number" class="form-control" id="editHeight" value="${object.props.height !== null && object.props.height !== undefined ? object.props.height : ''}" placeholder="Tự động">
+                            </div>
+                        </div>
+                        <small class="text-muted">Nếu để trống một trong hai, cái còn lại sẽ tự scale theo tỷ lệ gốc. Nếu để trống cả hai, hiển thị kích thước gốc.</small>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">${LanguageManager.t('height')} (để trống để tự động scale)</label>
-                        <input type="number" class="form-control" id="editHeight" value="${object.props.height !== null && object.props.height !== undefined ? object.props.height : ''}" placeholder="Tự động">
-                    </div>
-                    <small class="text-muted">Nếu để trống một trong hai, cái còn lại sẽ tự scale theo tỷ lệ gốc. Nếu để trống cả hai, hiển thị kích thước gốc.</small>
                     ${addPositionFields()}
                 `;
                 break;
 
             case 'icon':
                 formHtml = `
+                    ${addIdField()}
                     <div class="mb-3">
                         <label class="form-label">${LanguageManager.t('iconClass')}</label>
                         <select class="form-select" id="editIcon">
@@ -337,6 +356,7 @@ const ContextMenuManager = {
 
             case 'button':
                 formHtml = `
+                    ${addIdField()}
                     <div class="mb-3">
                         <label class="form-label">${LanguageManager.t('textLabel')}</label>
                         <input type="text" class="form-control" id="editText" value="${object.props.text || ''}">
@@ -359,6 +379,7 @@ const ContextMenuManager = {
 
             case 'checkbox':
                 formHtml = `
+                    ${addIdField()}
                     <div class="mb-3">
                         <label class="form-label">${LanguageManager.t('textLabel')}</label>
                         <input type="text" class="form-control" id="editText" value="${object.props.text || ''}">
@@ -376,6 +397,7 @@ const ContextMenuManager = {
             case 'dropdown':
                 const options = object.props.options || ['Option 1', 'Option 2', 'Option 3'];
                 formHtml = `
+                    ${addIdField()}
                     <div class="mb-3">
                         <label class="form-label">${LanguageManager.t('options')}</label>
                         <textarea class="form-control" id="editOptions" rows="5">${options.join('\n')}</textarea>
@@ -396,6 +418,7 @@ const ContextMenuManager = {
                 const toggleTexts = object.props.texts;
                 const toggleActive = object.props.active === true;
                 formHtml = `
+                    ${addIdField()}
                     <div class="mb-3">
                         <label class="form-label">${LanguageManager.t('textWhenOff')}</label>
                         <input type="text" class="form-control" id="editTextOff" value="${(toggleTexts.off || 'Toggle').replace(/"/g, '&quot;')}">
@@ -426,6 +449,7 @@ const ContextMenuManager = {
                 const stateTexts = object.props.texts;
                 const currentState = object.props.state !== undefined ? object.props.state : 0;
                 formHtml = `
+                    ${addIdField()}
                     <div class="mb-3">
                         <label class="form-label">${LanguageManager.t('textState0')}</label>
                         <input type="text" class="form-control" id="editTextState0" value="${(stateTexts[0] || '3-State Toggle').replace(/"/g, '&quot;')}">
@@ -450,37 +474,52 @@ const ContextMenuManager = {
                 const rectHasBg = object.props.hasBackground !== false;
                 const rectHasBorder = object.props.hasBorder !== false;
                 formHtml = `
+                    ${addIdField()}
                     <div class="mb-3">
-                        <label class="form-label">${LanguageManager.t('width')}</label>
-                        <input type="number" class="form-control" id="editWidth" value="${object.props.width || object.width || 200}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">${LanguageManager.t('height')}</label>
-                        <input type="number" class="form-control" id="editHeight" value="${object.props.height || object.height || 150}">
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editHasBackground" ${rectHasBg ? 'checked' : ''}>
-                            <label class="form-check-label" for="editHasBackground">Có nền</label>
+                        <label class="form-label">Kích thước</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="form-label small">${LanguageManager.t('width')}</label>
+                                <input type="number" class="form-control" id="editWidth" value="${object.props.width || object.width || 200}">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small">${LanguageManager.t('height')}</label>
+                                <input type="number" class="form-control" id="editHeight" value="${object.props.height || object.height || 150}">
+                            </div>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">${LanguageManager.t('backgroundColor')}</label>
-                        <input type="color" class="form-control form-control-color" id="editBgColor" value="${object.props.backgroundColor || '#007bff'}">
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editHasBorder" ${rectHasBorder ? 'checked' : ''}>
-                            <label class="form-check-label" for="editHasBorder">Có viền</label>
+                    <div class="mb-3 border-top pt-2">
+                        <label class="form-label fw-bold">Nền & Viền</label>
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="editHasBackground" ${rectHasBg ? 'checked' : ''}>
+                                    <label class="form-check-label" for="editHasBackground">Có nền</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small">Màu nền</label>
+                                <input type="color" class="form-control form-control-color" id="editBgColor" value="${object.props.backgroundColor || '#007bff'}">
+                            </div>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Màu viền</label>
-                        <input type="color" class="form-control form-control-color" id="editBorderColor" value="${object.props.borderColor || '#0056b3'}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Độ dày viền</label>
-                        <input type="number" class="form-control" id="editBorderWidth" value="${object.props.borderWidth || 2}" min="0">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="editHasBorder" ${rectHasBorder ? 'checked' : ''}>
+                                    <label class="form-check-label" for="editHasBorder">Có viền</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small">Màu viền</label>
+                                <input type="color" class="form-control form-control-color" id="editBorderColor" value="${object.props.borderColor || '#0056b3'}">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-6">
+                                <label class="form-label small">Độ dày viền</label>
+                                <input type="number" class="form-control" id="editBorderWidth" value="${object.props.borderWidth || 2}" min="0">
+                            </div>
+                        </div>
                     </div>
                     ${addPositionFields()}
                 `;
@@ -491,33 +530,43 @@ const ContextMenuManager = {
                 const circleHasBorder = object.props.hasBorder !== false;
                 const circleSize = object.props.width || object.width || 150;
                 formHtml = `
+                    ${addIdField()}
                     <div class="mb-3">
                         <label class="form-label">Kích thước (width = height)</label>
                         <input type="number" class="form-control" id="editSize" value="${circleSize}">
                     </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editHasBackground" ${circleHasBg ? 'checked' : ''}>
-                            <label class="form-check-label" for="editHasBackground">Có nền</label>
+                    <div class="mb-3 border-top pt-2">
+                        <label class="form-label fw-bold">Nền & Viền</label>
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="editHasBackground" ${circleHasBg ? 'checked' : ''}>
+                                    <label class="form-check-label" for="editHasBackground">Có nền</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small">Màu nền</label>
+                                <input type="color" class="form-control form-control-color" id="editBgColor" value="${object.props.backgroundColor || '#28a745'}">
+                            </div>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">${LanguageManager.t('backgroundColor')}</label>
-                        <input type="color" class="form-control form-control-color" id="editBgColor" value="${object.props.backgroundColor || '#28a745'}">
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editHasBorder" ${circleHasBorder ? 'checked' : ''}>
-                            <label class="form-check-label" for="editHasBorder">Có viền</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="editHasBorder" ${circleHasBorder ? 'checked' : ''}>
+                                    <label class="form-check-label" for="editHasBorder">Có viền</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small">Màu viền</label>
+                                <input type="color" class="form-control form-control-color" id="editBorderColor" value="${object.props.borderColor || '#1e7e34'}">
+                            </div>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Màu viền</label>
-                        <input type="color" class="form-control form-control-color" id="editBorderColor" value="${object.props.borderColor || '#1e7e34'}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Độ dày viền</label>
-                        <input type="number" class="form-control" id="editBorderWidth" value="${object.props.borderWidth || 2}" min="0">
+                        <div class="row mt-2">
+                            <div class="col-6">
+                                <label class="form-label small">Độ dày viền</label>
+                                <input type="number" class="form-control" id="editBorderWidth" value="${object.props.borderWidth || 2}" min="0">
+                            </div>
+                        </div>
                     </div>
                     ${addPositionFields()}
                 `;
@@ -527,37 +576,52 @@ const ContextMenuManager = {
                 const ellipseHasBg = object.props.hasBackground !== false;
                 const ellipseHasBorder = object.props.hasBorder !== false;
                 formHtml = `
+                    ${addIdField()}
                     <div class="mb-3">
-                        <label class="form-label">${LanguageManager.t('width')}</label>
-                        <input type="number" class="form-control" id="editWidth" value="${object.props.width || object.width || 200}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">${LanguageManager.t('height')}</label>
-                        <input type="number" class="form-control" id="editHeight" value="${object.props.height || object.height || 150}">
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editHasBackground" ${ellipseHasBg ? 'checked' : ''}>
-                            <label class="form-check-label" for="editHasBackground">Có nền</label>
+                        <label class="form-label">Kích thước</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="form-label small">${LanguageManager.t('width')}</label>
+                                <input type="number" class="form-control" id="editWidth" value="${object.props.width || object.width || 200}">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small">${LanguageManager.t('height')}</label>
+                                <input type="number" class="form-control" id="editHeight" value="${object.props.height || object.height || 150}">
+                            </div>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">${LanguageManager.t('backgroundColor')}</label>
-                        <input type="color" class="form-control form-control-color" id="editBgColor" value="${object.props.backgroundColor || '#ffc107'}">
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editHasBorder" ${ellipseHasBorder ? 'checked' : ''}>
-                            <label class="form-check-label" for="editHasBorder">Có viền</label>
+                    <div class="mb-3 border-top pt-2">
+                        <label class="form-label fw-bold">Nền & Viền</label>
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="editHasBackground" ${ellipseHasBg ? 'checked' : ''}>
+                                    <label class="form-check-label" for="editHasBackground">Có nền</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small">Màu nền</label>
+                                <input type="color" class="form-control form-control-color" id="editBgColor" value="${object.props.backgroundColor || '#ffc107'}">
+                            </div>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Màu viền</label>
-                        <input type="color" class="form-control form-control-color" id="editBorderColor" value="${object.props.borderColor || '#e0a800'}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Độ dày viền</label>
-                        <input type="number" class="form-control" id="editBorderWidth" value="${object.props.borderWidth || 2}" min="0">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="editHasBorder" ${ellipseHasBorder ? 'checked' : ''}>
+                                    <label class="form-check-label" for="editHasBorder">Có viền</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small">Màu viền</label>
+                                <input type="color" class="form-control form-control-color" id="editBorderColor" value="${object.props.borderColor || '#e0a800'}">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-6">
+                                <label class="form-label small">Độ dày viền</label>
+                                <input type="number" class="form-control" id="editBorderWidth" value="${object.props.borderWidth || 2}" min="0">
+                            </div>
+                        </div>
                     </div>
                     ${addPositionFields()}
                 `;
@@ -576,6 +640,27 @@ const ContextMenuManager = {
 
         const object = ObjectManager.getObject(this.editingObjectId);
         if (!object) return;
+
+        // Kiểm tra và xử lý đổi ID
+        const newId = $('#editObjectId').val().trim();
+        if (!newId) {
+            alert('ID không được để trống!');
+            return;
+        }
+
+        let idChanged = false;
+        let oldId = this.editingObjectId;
+
+        if (newId !== oldId) {
+            // Kiểm tra ID mới có trùng với object khác không
+            const allObjects = ObjectManager.getAllObjects();
+            const existingObject = allObjects.find(obj => obj.id === newId);
+            if (existingObject) {
+                alert(`ID "${newId}" đã tồn tại trong trang này. Vui lòng chọn ID khác.`);
+                return;
+            }
+            idChanged = true;
+        }
 
         const updates = { props: {} };
 
@@ -687,20 +772,74 @@ const ContextMenuManager = {
         if (!isNaN(newX)) updates.x = newX;
         if (!isNaN(newY)) updates.y = newY;
 
-        ObjectManager.updateObject(this.editingObjectId, updates);
+        if (idChanged) {
+            // Tạo object mới với ID mới
+            const newObject = {
+                ...object,
+                ...updates,
+                id: newId
+            };
 
-        // Re-render object
-        const $oldObj = $(`.canvas-object[data-id="${this.editingObjectId}"]`);
-        const newObject = ObjectManager.getObject(this.editingObjectId);
-        const $newObj = ObjectManager.renderObject(newObject);
-        $oldObj.replaceWith($newObj);
+            // Xóa object cũ
+            ObjectManager.deleteObject(oldId);
 
-        // Cập nhật vị trí CSS nếu tọa độ thay đổi
-        if (!isNaN(newX) || !isNaN(newY)) {
+            // Thêm object mới
+            ObjectManager.objects[newId] = newObject;
+
+            // Re-render object mới
+            const $newObj = ObjectManager.renderObject(newObject);
+            $('#canvas').append($newObj);
+
+            // Cập nhật vị trí CSS
             $newObj.css({
                 left: (newObject.x || 0) + 'px',
                 top: (newObject.y || 0) + 'px'
             });
+
+            // Cập nhật script: thay thế ID cũ bằng ID mới
+            const currentScript = ScriptRunner.currentScript || [];
+            const updatedScript = currentScript.map(action => {
+                if (action.target) {
+                    if (Array.isArray(action.target)) {
+                        return {
+                            ...action,
+                            target: action.target.map(t => t === oldId ? newId : t)
+                        };
+                    } else if (action.target === oldId) {
+                        return {
+                            ...action,
+                            target: newId
+                        };
+                    }
+                }
+                return action;
+            });
+
+            // Cập nhật script trong page data
+            if (PageManager.pages[PageManager.currentPageId]) {
+                PageManager.pages[PageManager.currentPageId].script = updatedScript;
+                ScriptRunner.loadScript(updatedScript);
+            }
+
+            // Cập nhật editingObjectId
+            this.editingObjectId = newId;
+        } else {
+            // Chỉ cập nhật object hiện tại
+            ObjectManager.updateObject(this.editingObjectId, updates);
+
+            // Re-render object
+            const $oldObj = $(`.canvas-object[data-id="${this.editingObjectId}"]`);
+            const newObject = ObjectManager.getObject(this.editingObjectId);
+            const $newObj = ObjectManager.renderObject(newObject);
+            $oldObj.replaceWith($newObj);
+
+            // Cập nhật vị trí CSS nếu tọa độ thay đổi
+            if (!isNaN(newX) || !isNaN(newY)) {
+                $newObj.css({
+                    left: (newObject.x || 0) + 'px',
+                    top: (newObject.y || 0) + 'px'
+                });
+            }
         }
 
         // Đánh dấu có thay đổi chưa lưu

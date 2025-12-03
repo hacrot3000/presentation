@@ -130,7 +130,12 @@ const LanguageManager = {
             visualPositionInstruction: 'Kéo thả object để chọn vị trí',
             confirm: 'Xác nhận',
             cancel: 'Hủy',
-            noObjectsInSlide: 'Không có object nào trong slide này'
+            noObjectsInSlide: 'Không có object nào trong slide này',
+            unsavedChangesTitle: 'Có thay đổi chưa lưu',
+            unsavedChangesMessage: 'Trang hiện tại có thay đổi chưa được lưu. Bạn muốn làm gì?',
+            stayOnPage: 'Ở lại trang',
+            saveToTemp: 'Không lưu (lưu tạm)',
+            saveToStorage: 'Lưu vào Storage'
         },
         en: {
             // App
@@ -259,7 +264,12 @@ const LanguageManager = {
             visualPositionInstruction: 'Drag and drop object to select position',
             confirm: 'Confirm',
             cancel: 'Cancel',
-            noObjectsInSlide: 'No objects in this slide'
+            noObjectsInSlide: 'No objects in this slide',
+            unsavedChangesTitle: 'Unsaved Changes',
+            unsavedChangesMessage: 'Current page has unsaved changes. What would you like to do?',
+            stayOnPage: 'Stay on Page',
+            saveToTemp: 'Don\'t Save (Save to Temp)',
+            saveToStorage: 'Save to Storage'
         }
     },
 

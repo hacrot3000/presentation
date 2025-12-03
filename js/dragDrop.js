@@ -151,6 +151,11 @@ const DragDropManager = {
         // Mouse up
         $(document).on('mouseup', () => {
             if (this.isDragging) {
+                // Đánh dấu có thay đổi chưa lưu khi drag xong (trước khi reset)
+                if (this.dragObject) {
+                    PageManager.hasUnsavedChanges = true;
+                    PageManager.updateSaveButtonState();
+                }
                 this.isDragging = false;
                 if (this.dragObject) {
                     $(`.canvas-object[data-id="${this.dragObject.id}"]`).removeClass('dragging');
@@ -164,6 +169,9 @@ const DragDropManager = {
                     const $obj = $(`.canvas-object[data-id="${this.resizeObject.id}"]`);
                     $obj.removeClass('resizing');
                     $obj.find('.resize-handle').hide();
+                    // Đánh dấu có thay đổi chưa lưu
+                    PageManager.hasUnsavedChanges = true;
+                    PageManager.updateSaveButtonState();
                     PageManager.saveCurrentPage();
                 }
                 this.resizeObject = null;

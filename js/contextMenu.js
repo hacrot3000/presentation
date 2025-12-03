@@ -174,6 +174,9 @@ const ContextMenuManager = {
                 this.showEditModal(object);
             }, 100);
 
+            // Đánh dấu có thay đổi chưa lưu
+            PageManager.hasUnsavedChanges = true;
+            PageManager.updateSaveButtonState();
             PageManager.saveCurrentPage();
             return;
         }
@@ -201,6 +204,8 @@ const ContextMenuManager = {
             case 'delete':
                 if (confirm(LanguageManager.t('confirmDelete'))) {
                     ObjectManager.deleteObject(this.currentObjectId);
+                    PageManager.hasUnsavedChanges = true;
+                    PageManager.updateSaveButtonState();
                     PageManager.saveCurrentPage();
                 }
                 break;
@@ -208,11 +213,15 @@ const ContextMenuManager = {
                 const maxZ = Math.max(...ObjectManager.getAllObjects().map(o => o.zIndex || 1));
                 ObjectManager.updateObject(this.currentObjectId, { zIndex: maxZ + 1 });
                 $(`.canvas-object[data-id="${this.currentObjectId}"]`).css('zIndex', maxZ + 1);
+                PageManager.hasUnsavedChanges = true;
+                PageManager.updateSaveButtonState();
                 PageManager.saveCurrentPage();
                 break;
             case 'sendToBack':
                 ObjectManager.updateObject(this.currentObjectId, { zIndex: 0 });
                 $(`.canvas-object[data-id="${this.currentObjectId}"]`).css('zIndex', 0);
+                PageManager.hasUnsavedChanges = true;
+                PageManager.updateSaveButtonState();
                 PageManager.saveCurrentPage();
                 break;
             case 'toggleDraggable':
@@ -224,6 +233,8 @@ const ContextMenuManager = {
                 } else {
                     $obj.addClass('not-draggable');
                 }
+                PageManager.hasUnsavedChanges = true;
+                PageManager.updateSaveButtonState();
                 PageManager.saveCurrentPage();
                 break;
         }
@@ -692,6 +703,9 @@ const ContextMenuManager = {
             });
         }
 
+        // Đánh dấu có thay đổi chưa lưu
+        PageManager.hasUnsavedChanges = true;
+        PageManager.updateSaveButtonState();
         PageManager.saveCurrentPage();
 
         const modal = bootstrap.Modal.getInstance($('#editObjectModal')[0]);
@@ -726,6 +740,9 @@ const ContextMenuManager = {
 
         PageManager.pages[PageManager.currentPageId].background = background;
         PageManager.applyBackground(background);
+        // Đánh dấu có thay đổi chưa lưu
+        PageManager.hasUnsavedChanges = true;
+        PageManager.updateSaveButtonState();
         PageManager.saveCurrentPage();
 
         const modal = bootstrap.Modal.getInstance($('#editBackgroundModal')[0]);

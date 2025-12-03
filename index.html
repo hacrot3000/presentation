@@ -37,7 +37,7 @@
             </div>
             <div class="d-flex gap-2">
                 <!-- Quick Save Button -->
-                <button class="btn btn-success" id="btnQuickSave" title="Lưu nhanh">
+                <button class="btn btn-success" id="btnQuickSave" title="Lưu nhanh" disabled>
                     <i class="fas fa-save"></i> <span data-i18n="save">Lưu</span>
                 </button>
                 <!-- Actions Dropdown -->
@@ -288,6 +288,26 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="close">Đóng</button>
                     <button type="button" class="btn btn-primary" id="btnDownloadJSON" data-i18n="downloadJSON">Tải xuống file JSON</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirm Unsaved Changes -->
+    <div class="modal fade" id="confirmUnsavedModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-i18n="unsavedChangesTitle">Có thay đổi chưa lưu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p data-i18n="unsavedChangesMessage">Trang hiện tại có thay đổi chưa được lưu. Bạn muốn làm gì?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btnStayOnPage" data-i18n="stayOnPage">Ở lại trang</button>
+                    <button type="button" class="btn btn-warning" id="btnSaveToTemp" data-i18n="saveToTemp">Không lưu (lưu tạm)</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveToStorage" data-i18n="saveToStorage">Lưu vào Storage</button>
                 </div>
             </div>
         </div>

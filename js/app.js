@@ -20,6 +20,9 @@ const App = {
 
         // Cập nhật trạng thái nút ngôn ngữ
         this.updateLanguageButtons();
+
+        // Cập nhật trạng thái nút Lưu
+        PageManager.updateSaveButtonState();
     },
 
     restoreSidebarState() {
@@ -74,6 +77,9 @@ const App = {
                     ContextMenuManager.showEditModal(object);
                 }, 100);
 
+                // Đánh dấu có thay đổi chưa lưu
+                PageManager.hasUnsavedChanges = true;
+                PageManager.updateSaveButtonState();
                 PageManager.saveCurrentPage();
             }
         });
@@ -99,7 +105,8 @@ const App = {
         // Save State - lưu và mở popup
         $('#btnSaveState').on('click', (e) => {
             e.preventDefault();
-            PageManager.saveCurrentPage();
+            // Export dữ liệu đã lưu từ storage (không phải trạng thái hiện tại đang animation)
+            // Điều này đảm bảo file tải xuống chứa dữ liệu gốc đúng, không bị ảnh hưởng bởi animation đang chạy
             const data = PageManager.exportData();
             $('#saveStateTextarea').val(JSON.stringify(data, null, 2));
             const modal = new bootstrap.Modal($('#saveStateModal')[0]);
@@ -144,6 +151,9 @@ const App = {
                 const script = JSON.parse(scriptText);
                 PageManager.pages[PageManager.currentPageId].script = script;
                 ScriptRunner.loadScript(script);
+                // Đánh dấu có thay đổi chưa lưu
+                PageManager.hasUnsavedChanges = true;
+                PageManager.updateSaveButtonState();
                 PageManager.saveCurrentPage();
                 const modal = bootstrap.Modal.getInstance($('#scriptEditorModal')[0]);
                 modal.hide();
@@ -518,6 +528,37 @@ const App = {
             if ($(e.target).is('#canvas') || ($(e.target).closest('.canvas-object').length === 0 && !$(e.target).hasClass('canvas-object'))) {
                 ObjectManager.selectObject(null);
                 ScriptRunner.runNext();
+            }
+        });
+
+        // Handlers cho modal xác nhận thay đổi chưa lưu
+        $('#btnStayOnPage').on('click', () => {
+            const modal = bootstrap.Modal.getInstance($('#confirmUnsavedModal')[0]);
+            if (modal) modal.hide();
+            PageManager.pendingNavigation = null;
+        });
+
+        $('#btnSaveToTemp').on('click', () => {
+            // Lưu trạng thái tạm và chuyển trang
+            PageManager.savePageStateToTemp();
+            const targetPage = PageManager.pendingNavigation;
+            PageManager.pendingNavigation = null;
+            const modal = bootstrap.Modal.getInstance($('#confirmUnsavedModal')[0]);
+            if (modal) modal.hide();
+            if (targetPage) {
+                PageManager.goToPage(targetPage, true);
+            }
+        });
+
+        $('#btnSaveToStorage').on('click', () => {
+            // Lưu vào storage và chuyển trang
+            PageManager.saveCurrentPage();
+            const targetPage = PageManager.pendingNavigation;
+            PageManager.pendingNavigation = null;
+            const modal = bootstrap.Modal.getInstance($('#confirmUnsavedModal')[0]);
+            if (modal) modal.hide();
+            if (targetPage) {
+                PageManager.goToPage(targetPage, true);
             }
         });
 

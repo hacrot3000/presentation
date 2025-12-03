@@ -2,9 +2,21 @@
 const PageManager = {
     pages: {},
     currentPageId: null,
+    // Lưu trạng thái tạm của từng trang (không lưu vào storage)
+    pageStates: {}, // { pageId: { objectVisibility: {}, scriptIndex: 0, objectPositions: {} } }
+    pendingNavigation: null, // Lưu pageId muốn chuyển đến khi có thay đổi chưa lưu
+    hasUnsavedChanges: false, // Flag để kiểm tra có thay đổi chưa lưu
 
     // Khởi tạo
     init() {
+        // Reset pageStates khi reload trang (chỉ reset khi reload, không reset khi chuyển trang)
+        // Kiểm tra xem có phải là lần đầu load không (không có pageStates trong memory)
+        if (!this.pageStates) {
+            this.pageStates = {};
+        }
+        this.hasUnsavedChanges = false;
+        this.pendingNavigation = null;
+
         this.loadFromStorage();
         if (Object.keys(this.pages).length === 0) {
             this.createPage('page_1');
@@ -41,21 +53,98 @@ const PageManager = {
     },
 
     // Chuyển đến trang
-    goToPage(pageId) {
+    goToPage(pageId, skipCheck = false) {
         if (!this.pages[pageId]) return false;
 
-        // Lưu trang hiện tại trước khi chuyển
-        this.saveCurrentPage();
+        // Kiểm tra có thay đổi chưa lưu (trừ khi skipCheck = true)
+        if (!skipCheck && this.hasUnsavedChanges) {
+            this.pendingNavigation = pageId;
+            this.showUnsavedChangesDialog();
+            return false;
+        }
 
+        // Lưu trạng thái tạm của trang hiện tại trước khi chuyển
+        this.savePageStateToTemp();
+
+        // Chuyển trang
         this.currentPageId = pageId;
         StorageManager.saveCurrentPage(pageId);
         this.renderCurrentPage();
         this.updatePageInfo();
 
-        // Reset script runner khi chuyển trang
-        ScriptRunner.reset();
+        // Restore trạng thái tạm nếu có
+        this.restorePageStateFromTemp();
+
+        // Reset flag (trang mới chưa có thay đổi)
+        this.hasUnsavedChanges = false;
+        this.updateSaveButtonState();
 
         return true;
+    },
+
+    // Lưu trạng thái tạm của trang hiện tại
+    savePageStateToTemp() {
+        if (!this.currentPageId) return;
+
+        const objects = ObjectManager.getAllObjects();
+        const objectVisibility = {};
+        const objectPositions = {};
+
+        objects.forEach(obj => {
+            objectVisibility[obj.id] = obj.visible !== false;
+            objectPositions[obj.id] = { x: obj.x, y: obj.y };
+        });
+
+        this.pageStates[this.currentPageId] = {
+            objectVisibility: objectVisibility,
+            objectPositions: objectPositions,
+            scriptIndex: ScriptRunner.currentIndex
+        };
+    },
+
+    // Restore trạng thái tạm của trang
+    restorePageStateFromTemp() {
+        if (!this.currentPageId || !this.pageStates[this.currentPageId]) {
+            // Nếu không có trạng thái tạm, khởi tạo từ đầu
+            ScriptRunner.reset();
+            ScriptRunner.initializeObjectVisibility(ScriptRunner.currentScript);
+            return;
+        }
+
+        const state = this.pageStates[this.currentPageId];
+
+        // Restore visibility
+        Object.keys(state.objectVisibility).forEach(objId => {
+            const visible = state.objectVisibility[objId];
+            const $obj = $(`.canvas-object[data-id="${objId}"]`);
+            if ($obj.length) {
+                if (visible) {
+                    $obj.removeClass('hidden').css({ display: 'block', opacity: '', visibility: 'visible' });
+                } else {
+                    $obj.addClass('hidden').css({ display: 'none' });
+                }
+                ObjectManager.updateObject(objId, { visible: visible });
+            }
+        });
+
+        // Restore positions
+        Object.keys(state.objectPositions).forEach(objId => {
+            const pos = state.objectPositions[objId];
+            const $obj = $(`.canvas-object[data-id="${objId}"]`);
+            if ($obj.length) {
+                ObjectManager.updateObject(objId, { x: pos.x, y: pos.y });
+                $obj.css({ left: pos.x + 'px', top: pos.y + 'px' });
+            }
+        });
+
+        // Restore script index
+        ScriptRunner.currentIndex = state.scriptIndex || 0;
+    },
+
+    // Hiển thị dialog hỏi về thay đổi chưa lưu
+    showUnsavedChangesDialog() {
+        const modal = new bootstrap.Modal($('#confirmUnsavedModal')[0]);
+        modal.show();
     },
 
     // Trang trước
@@ -137,8 +226,17 @@ const PageManager = {
     saveCurrentPage() {
         if (!this.currentPageId) return;
 
+        // Nếu có thay đổi chưa lưu (do người dùng chỉnh sửa), cập nhật objects từ ObjectManager
+        // Nếu không có thay đổi, giữ nguyên dữ liệu đã lưu (tránh lưu trạng thái đang animation)
+        let objects = this.pages[this.currentPageId]?.objects || [];
+        if (this.hasUnsavedChanges) {
+            // Có thay đổi do người dùng, export trạng thái hiện tại
+            objects = ObjectManager.exportObjects();
+        }
+        // Nếu không có thay đổi, giữ nguyên objects từ this.pages (dữ liệu đã lưu)
+
         const pageData = {
-            objects: ObjectManager.exportObjects(),
+            objects: objects,
             script: ScriptRunner.currentScript,
             background: this.pages[this.currentPageId].background || {
                 color: '#f5f5f5',
@@ -150,6 +248,22 @@ const PageManager = {
 
         this.pages[this.currentPageId] = pageData;
         StorageManager.savePage(this.currentPageId, pageData);
+
+        // Reset flag sau khi lưu
+        this.hasUnsavedChanges = false;
+
+        // Cập nhật trạng thái nút Lưu
+        this.updateSaveButtonState();
+    },
+
+    // Cập nhật trạng thái nút Lưu
+    updateSaveButtonState() {
+        const $btn = $('#btnQuickSave');
+        if (this.hasUnsavedChanges) {
+            $btn.prop('disabled', false);
+        } else {
+            $btn.prop('disabled', true);
+        }
     },
 
     // Cập nhật thông tin trang
@@ -212,8 +326,11 @@ const PageManager = {
 
     // Export toàn bộ dữ liệu
     exportData() {
+        // Export dữ liệu gốc từ storage, không phải từ trạng thái hiện tại
+        // (tránh trường hợp animation đang chạy làm sai dữ liệu)
+        const savedPages = StorageManager.loadAllPages();
         return {
-            pages: this.pages,
+            pages: savedPages || this.pages,
             currentPage: this.currentPageId
         };
     },

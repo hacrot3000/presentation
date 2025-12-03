@@ -45,6 +45,7 @@ const PageManager = {
         this.pages[pageId] = {
             objects: [],
             script: [],
+            title: '', // Tiêu đề trang, để trống sẽ dùng mặc định "Trang X"
             background: {
                 color: '#f5f5f5',
                 imageUrl: '',
@@ -282,6 +283,38 @@ const PageManager = {
         const pageText = LanguageManager.t('page');
         const ofText = LanguageManager.t('of');
         $('#pageInfo').text(`${pageText} ${currentIndex} ${ofText} ${totalPages}`);
+
+        // Cập nhật tiêu đề trang
+        const page = this.pages[this.currentPageId];
+        const pageTitle = page && page.title ? page.title : `${pageText} ${currentIndex}`;
+        $('#pageTitleInput').val(pageTitle);
+        $('#pageTitleDisplay').text(pageTitle);
+
+        // Đảm bảo hiển thị đúng: label hiển thị, input và button ẩn
+        $('#pageTitleDisplay').show();
+        $('#pageTitleEditBtn').show();
+        $('#pageTitleInput').hide();
+    },
+
+    // Lưu tiêu đề trang
+    savePageTitle(title) {
+        if (!this.currentPageId) return;
+
+        if (!this.pages[this.currentPageId]) {
+            this.pages[this.currentPageId] = {};
+        }
+
+        this.pages[this.currentPageId].title = title || '';
+
+        // Lưu vào storage
+        StorageManager.savePage(this.currentPageId, this.pages[this.currentPageId]);
+
+        // Đánh dấu có thay đổi
+        this.hasUnsavedChanges = true;
+        this.updateSaveButtonState();
+
+        // Cập nhật hiển thị
+        this.updatePageInfo();
     },
 
     // Load từ storage

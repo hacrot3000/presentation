@@ -9,7 +9,7 @@ const LanguageManager = {
             // Toolbar
             prev: 'Trước',
             next: 'Sau',
-            addPage: 'Thêm trang mới',
+            addPage: 'Thêm trang',
             saveState: 'Lưu và tải xuống',
             scriptEditor: 'Trình chỉnh sửa Script',
             page: 'Trang',

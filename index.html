@@ -17,7 +17,7 @@
 <body>
     <!-- Thanh chuyển trang (trên cùng) -->
     <nav class="navbar navbar-dark bg-dark">
-        <div class="container-fluid">
+        <div class="container-fluid d-flex">
             <div class="d-flex gap-2">
                 <button class="btn btn-outline-light btn-sm" id="btnToggleSidebar" title="Toggle Sidebar">
                     <i class="fas fa-bars"></i>
@@ -25,15 +25,30 @@
                 <button class="btn btn-outline-light" id="btnPrev">
                     <i class="fas fa-chevron-left"></i> <span data-i18n="prev">Prev</span>
                 </button>
+                <span id="pageInfo" class="navbar-text me-2">
+                    <span data-i18n="page">Trang</span> 1 / 1
+                </span>
                 <button class="btn btn-outline-light" id="btnNext">
                     <span data-i18n="next">Next</span> <i class="fas fa-chevron-right"></i>
                 </button>
                 <button class="btn btn-primary" id="btnAddPage">
-                    <i class="fas fa-plus"></i> <span data-i18n="addPage">Thêm trang mới</span>
+                    <i class="fas fa-plus"></i> <span data-i18n="addPage">Thêm trang</span>
                 </button>
-                <span class="navbar-text ms-3" id="pageInfo">
-                    <span data-i18n="page">Trang</span> 1 / 1
-                </span>
+            </div>
+            <div class="flex-grow-1 d-flex justify-content-center align-items-center position-relative">
+                <div id="pageTitleContainer" class="position-relative">
+                    <span id="pageTitleDisplay" class="page-title-display">
+                        <span data-i18n="page">Trang</span> 1
+                    </span>
+                    <button id="pageTitleEditBtn" class="btn btn-link btn-sm page-title-edit-btn" style="display: none;">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <input type="text"
+                           id="pageTitleInput"
+                           class="page-title-input"
+                           style="display: none;"
+                           placeholder="Nhập tiêu đề trang">
+                </div>
             </div>
             <div class="d-flex gap-2">
                 <!-- Quick Save Button -->

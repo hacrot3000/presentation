@@ -290,3 +290,56 @@
     background-color: #0056b3;
     color: white;
 }
+
+/* Page Title Styles */
+#pageTitleContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-title-display {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #fff;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    user-select: none;
+}
+
+.page-title-display:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.page-title-edit-btn {
+    color: #fff;
+    padding: 4px 8px;
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+#pageTitleContainer:hover .page-title-edit-btn {
+    opacity: 1;
+}
+
+.page-title-input {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    padding: 4px 8px;
+    width: 300px;
+    text-align: center;
+}
+
+.page-title-input:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}

@@ -118,6 +118,36 @@ const App = {
             }
         });
 
+        // Chỉnh sửa tiêu đề trang
+        $('#pageTitleDisplay, #pageTitleEditBtn').on('click', function(e) {
+            e.stopPropagation();
+            // Ẩn label và nút edit, hiện input
+            $('#pageTitleDisplay').hide();
+            $('#pageTitleEditBtn').hide();
+            $('#pageTitleInput').show().focus().select();
+        });
+
+        $('#pageTitleInput').on('blur', function() {
+            const title = $(this).val().trim();
+            PageManager.savePageTitle(title);
+            // Ẩn input, hiện lại label và nút edit
+            $(this).hide();
+            $('#pageTitleDisplay').show();
+            $('#pageTitleEditBtn').show();
+        });
+
+        $('#pageTitleInput').on('keypress', function(e) {
+            if (e.which === 13) { // Enter
+                $(this).blur();
+            } else if (e.which === 27) { // Escape
+                const currentIndex = PageManager.pageOrder.indexOf(PageManager.currentPageId) + 1;
+                const pageText = LanguageManager.t('page');
+                const pageTitle = PageManager.pages[PageManager.currentPageId]?.title || `${pageText} ${currentIndex}`;
+                $(this).val(pageTitle);
+                $(this).blur();
+            }
+        });
+
         // Quick Save - chỉ lưu vào storage, không mở popup
         $('#btnQuickSave').on('click', () => {
             PageManager.saveCurrentPage();
